@@ -1,0 +1,200 @@
+name: 投稿解析与邮件通知
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: read
+  contents: read
+
+jobs:
+  parse-and-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 安装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 解析投稿内容
+        id: parser
+        run: |
+          python3 << 'PYSCRIPT'
+          import re, json
+
+          issue_body = """${{ github.event.issue.body }}"""
+
+          def get_field(body, key):
+              pattern = rf'^{re.escape(key)}:\s*(.+?)$'
+              m = re.search(pattern, body, re.MULTILINE)
+              if m:
+                  val = m.group(1).strip()
+                  if val in ('', '___', '未填', '未知'):
+                      return ""
+                  return val
+              return ""
+
+          def get_coord_field(body, key):
+              pattern = rf'^{re.escape(key)}:\s*\[([\d\.\-]+),\s*([\d\.\-]+)\]'
+              m = re.search(pattern, body, re.MULTILINE)
+              if m:
+                  return [float(m.group(1)), float(m.group(2))]
+              return None
+
+          name = get_field(issue_body, 'name')
+          region = get_field(issue_body, 'region')
+          city = get_field(issue_body, 'city')
+          address = get_field(issue_body, 'address')
+          open_year = get_field(issue_body, 'open_year')
+          close_year = get_field(issue_body, 'close_year')
+          status_key = get_field(issue_body, 'status_key')
+          status = get_field(issue_body, 'status')
+          photo_url = get_field(issue_body, 'photo_url')
+
+          valid_keys = ['still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone']
+          if status_key not in valid_keys:
+              status_key = 'pending-review'
+
+          # 解析历史变迁 locations 数组
+          locations = []
+          max_seq = 0
+          loc_pattern = re.compile(r'^location_(\d+)_label:\s*(.+?)$', re.MULTILINE)
+          for m in loc_pattern.finditer(issue_body):
+              seq = int(m.group(1))
+              max_seq = max(max_seq, seq)
+
+          for n in range(1, max_seq + 1):
+              loc_label = get_field(issue_body, f'location_{n}_label')
+              loc_address = get_field(issue_body, f'location_{n}_address')
+              loc_open = get_field(issue_body, f'location_{n}_open_year')
+              loc_close = get_field(issue_body, f'location_{n}_close_year')
+              loc_coord = get_coord_field(issue_body, f'location_{n}_coordinates')
+              loc_photo = get_field(issue_body, f'location_{n}_photo_url')
+
+              loc_entry = {
+                  "seq": n,
+                  "label": loc_label or f"位置{n}",
+                  "address": loc_address or "",
+                  "open_year": loc_open or "",
+                  "close_year": loc_close or "",
+              }
+              if loc_coord:
+                  loc_entry["coordinates"] = loc_coord
+              if loc_photo:
+                  loc_entry["photo_url"] = loc_photo
+              locations.append(loc_entry)
+
+          # 确定特征坐标：优先使用最后一个 location 的坐标，其次第一个，最后 fallback
+          feature_lng, feature_lat = 110.0, 30.0
+          if locations:
+              for i in range(len(locations) - 1, -1, -1):
+                  if "coordinates" in locations[i]:
+                      feature_lng = locations[i]["coordinates"][0]
+                      feature_lat = locations[i]["coordinates"][1]
+                      break
+          if feature_lng == 110.0:
+              coord_pattern = r'\[([\d\.\-]+),\s*([\d\.\-]+)\]'
+              coord_match = re.search(coord_pattern, issue_body)
+              if coord_match:
+                  feature_lng = float(coord_match.group(1))
+                  feature_lat = float(coord_match.group(2))
+
+          missing = []
+          if not name: missing.append('name')
+          if not city: missing.append('city')
+          if status_key == 'pending-review': missing.append('status_key')
+          if not status: missing.append('status')
+          if not address and not locations: missing.append('address/locations')
+
+          properties = {
+              "name": name or "待补充门店名称",
+              "region": region or "待人工补充",
+              "city": city or "待人工补充",
+              "address": address or "",
+              "open_year": open_year or "",
+              "close_year": close_year or "",
+              "status_key": status_key,
+              "status": status or "待人工补充",
+              "photo_url": photo_url or ""
+          }
+
+          if locations:
+              properties["locations"] = locations
+
+          feature = {
+              "type": "Feature",
+              "geometry": {
+                  "type": "Point",
+                  "coordinates": [feature_lng, feature_lat]
+              },
+              "properties": properties
+          }
+
+          result = {
+              "issue_title": """${{ github.event.issue.title }}""",
+              "issue_url": """${{ github.event.issue.html_url }}""",
+              "issue_number": ${{ github.event.issue.number }},
+              "submitter": """${{ github.event.issue.user.login }}""",
+              "missing_fields": missing,
+              "parsed_feature": feature
+          }
+
+          with open("result.json", "w", encoding="utf-8") as f:
+              json.dump(result, f, ensure_ascii=False, indent=2)
+
+          with open("feature_output.txt", "w", encoding="utf-8") as f:
+              f.write(json.dumps(feature, ensure_ascii=False, indent=2))
+
+          import os
+          with open(os.environ.get('GITHUB_OUTPUT', 'github_output.txt'), 'a', encoding='utf-8') as out:
+              out.write(f"feature_name={name or '未知门店'}\n")
+              out.write(f"feature_city={city or '未知'}\n")
+              out.write(f"feature_status={status_key}\n")
+              out.write(f"missing_count={len(missing)}\n")
+
+          print("✅ 解析完成")
+          print(json.dumps(feature, ensure_ascii=False, indent=2))
+          if missing:
+              print(f"⚠️ 缺少字段: {', '.join(missing)}")
+          PYSCRIPT
+
+      - name: 读取解析结果
+        run: |
+          echo "=== 解析结果 ==="
+          cat result.json
+          echo "=== Feature JSON ==="
+          cat feature_output.txt
+          echo "=== 输出到 GITHUB_ENV ==="
+          echo "FEATURE_JSON<<EOF" >> $GITHUB_ENV
+          cat feature_output.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 发送邮件通知
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          secure: ${{ secrets.SMTP_SECURE }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "【麦当劳旧址投稿】#${{ github.event.issue.number }} ${{ github.event.issue.title }}"
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
+          body: |
+            🔔 仓库收到新门店投稿！
+
+            Issue 链接：${{ github.event.issue.html_url }}
+            投稿人：${{ github.event.issue.user.login }}
+
+            =====================
+            自动生成待审核 GeoJSON Feature：
+            ```json
+            ${{ env.FEATURE_JSON }}
+            ```
+
+            =====================
+            请登录 GitHub 审核后合并至 data/sample.geojson
+
+            —— 麦当劳旧址档案项目机器人

@@ -1,0 +1,629 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [113.2644, 23.1291]
+      },
+      "properties": {
+        "name": "广州第一家麦当劳（63层广东国际大厦首层）",
+        "region": "中国‑广东省",
+        "city": "广州",
+        "address": "广州市越秀区环市东路 63 层广东国际大厦首层",
+        "open_year": "1993‑02‑20",
+        "close_year": "2010‑03‑31",
+        "status_key": "moved_same_building",
+        "status": "大楼尚存；商号搬迁至本大厦二楼；首层现为银行酒馆，无纪念牌匾",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "广州市越秀区环市东路 63 层广东国际大厦首层",
+            "open_year": "1993‑02‑20",
+            "close_year": "2010‑03‑31",
+            "coordinates": [113.2644, 23.1291],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "同楼搬迁",
+            "address": "广州市越秀区环市东路 63 层广东国际大厦二楼",
+            "open_year": "2010‑04‑01",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.0579, 22.5431]
+      },
+      "properties": {
+        "name": "麦当劳 深圳光华店",
+        "region": "中国‑广东省",
+        "city": "深圳",
+        "address": "深圳市福田区光华路",
+        "open_year": "1990‑10‑08",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "深圳首批麦当劳门店之一；原址营业至今；位于光华路核心商圈",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "深圳市福田区光华路",
+            "open_year": "1990‑10‑08",
+            "close_year": "营业中",
+            "coordinates": [114.0579, 22.5431],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.4737, 31.2304]
+      },
+      "properties": {
+        "name": "麦当劳 上海南京西路店",
+        "region": "中国‑上海市",
+        "city": "上海",
+        "address": "上海市静安区南京西路",
+        "open_year": "1994‑07‑22",
+        "close_year": "2023‑05‑15",
+        "status_key": "moved_same_building",
+        "status": "大楼尚存；商号搬迁至本大厦其他楼层；南京西路老字号商圈变迁缩影",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "上海市静安区南京西路（原址一层）",
+            "open_year": "1994‑07‑22",
+            "close_year": "2023‑05‑15",
+            "coordinates": [121.4737, 31.2304],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "同楼搬迁",
+            "address": "上海市静安区南京西路（同大厦其他楼层）",
+            "open_year": "2023‑05‑16",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [116.4105, 39.9049]
+      },
+      "properties": {
+        "name": "麦当劳 北京王府井店",
+        "region": "中国‑北京市",
+        "city": "北京",
+        "address": "北京市东城区王府井大街",
+        "open_year": "1992‑04‑23",
+        "close_year": "2022‑11‑30",
+        "status_key": "moved_far_away",
+        "status": "王府井步行街老楼已不再营业；商号迁至附近新址；原址为北京麦当劳早期代表门店",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "北京市东城区王府井大街原址",
+            "open_year": "1992‑04‑23",
+            "close_year": "2022‑11‑30",
+            "coordinates": [116.4105, 39.9049],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "远迁新址",
+            "address": "北京市东城区王府井大街附近新址",
+            "open_year": "2022‑12‑01",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.1586, 22.2793]
+      },
+      "properties": {
+        "name": "麦当劳 香港中环店",
+        "region": "香港特别行政区",
+        "city": "香港",
+        "address": "香港中环",
+        "open_year": "1975‑01‑26",
+        "close_year": "2021‑03‑31",
+        "status_key": "building_gone",
+        "status": "香港最早期麦当劳门店之一；原建筑已拆除；原址现为商业综合体；无任何 McDonald's 遗留标识",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "香港中环原址",
+            "open_year": "1975‑01‑26",
+            "close_year": "2021‑03‑31",
+            "coordinates": [114.1586, 22.2793],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.5654, 25.0330]
+      },
+      "properties": {
+        "name": "麦当劳 台北西门町店",
+        "region": "中国‑台湾省",
+        "city": "台北",
+        "address": "台北市万华区西门町",
+        "open_year": "1988‑06‑10",
+        "close_year": "2020‑08‑15",
+        "status_key": "building_gone",
+        "status": "西门町地标门店；原建筑已拆除改建；台湾麦当劳结业潮中的标志性事件",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "台北市万华区西门町原址",
+            "open_year": "1988‑06‑10",
+            "close_year": "2020‑08‑15",
+            "coordinates": [121.5654, 25.0330],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [113.5492, 22.1987]
+      },
+      "properties": {
+        "name": "麦当劳 澳门议事亭前地店",
+        "region": "澳门特别行政区",
+        "city": "澳门",
+        "address": "澳门议事亭前地",
+        "open_year": "1987‑11‑20",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "澳门历史城区内营业至今的麦当劳门店；议事亭前地地标之一",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "澳门议事亭前地",
+            "open_year": "1987‑11‑20",
+            "close_year": "营业中",
+            "coordinates": [113.5492, 22.1987],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.3050, 22.3193]
+      },
+      "properties": {
+        "name": "麦当劳 香港铜锣湾店",
+        "region": "香港特别行政区",
+        "city": "香港",
+        "address": "香港铜锣湾",
+        "open_year": "1977‑08‑05",
+        "close_year": "2019‑02‑28",
+        "status_key": "moved_same_building",
+        "status": "铜锣湾地标老店；同大楼内搬迁至其他楼层；原址曾是香港最大麦当劳门店之一",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "香港铜锣湾原址（底层）",
+            "open_year": "1977‑08‑05",
+            "close_year": "2019‑02‑28",
+            "coordinates": [114.3050, 22.3193],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "同楼搬迁",
+            "address": "香港铜锣湾同大楼其他楼层",
+            "open_year": "2019‑03‑01",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.4693, 31.2397]
+      },
+      "properties": {
+        "name": "麦当劳 上海陆家嘴店",
+        "region": "中国‑上海市",
+        "city": "上海",
+        "address": "上海市浦东新区陆家嘴",
+        "open_year": "1999‑12‑18",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "陆家嘴金融区核心地段；东方明珠电视塔脚下营业至今的 McDonald's",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "上海市浦东新区陆家嘴",
+            "open_year": "1999‑12‑18",
+            "close_year": "营业中",
+            "coordinates": [121.4693, 31.2397],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [113.3245, 23.1068]
+      },
+      "properties": {
+        "name": "麦当劳 广州天河城店",
+        "region": "中国‑广东省",
+        "city": "广州",
+        "address": "广州市天河区天河城",
+        "open_year": "1996‑09‑30",
+        "close_year": "2022‑06‑15",
+        "status_key": "moved_far_away",
+        "status": "天河城商圈老牌门店；迁至附近另一商业综合体；广州商业变迁见证者",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "广州市天河区天河城",
+            "open_year": "1996‑09‑30",
+            "close_year": "2022‑06‑15",
+            "coordinates": [113.3245, 23.1068],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "附近新址",
+            "address": "广州市天河区附近商业综合体",
+            "open_year": "2022‑06‑16",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.0859, 22.5475]
+      },
+      "properties": {
+        "name": "麦当劳 深圳华强北店",
+        "region": "中国‑广东省",
+        "city": "深圳",
+        "address": "深圳市福田区华强北",
+        "open_year": "1995‑03‑15",
+        "close_year": "2023‑01‑10",
+        "status_key": "building_gone",
+        "status": "华强北电子商圈老字号；原建筑已拆除；现为数码城扩展区域的一部分",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "深圳市福田区华强北原址",
+            "open_year": "1995‑03‑15",
+            "close_year": "2023‑01‑10",
+            "coordinates": [114.0859, 22.5475],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [120.1551, 30.2741]
+      },
+      "properties": {
+        "name": "麦当劳 杭州西湖店",
+        "region": "中国‑浙江省",
+        "city": "杭州",
+        "address": "杭州市西湖区西湖畔",
+        "open_year": "2000‑05‑20",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "西湖边标志性麦当劳门店；湖景商圈营业逾20年",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "杭州市西湖区西湖畔",
+            "open_year": "2000‑05‑20",
+            "close_year": "营业中",
+            "coordinates": [120.1551, 30.2741],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [120.6197, 31.2990]
+      },
+      "properties": {
+        "name": "麦当劳 苏州观前街店",
+        "region": "中国‑江苏省",
+        "city": "苏州",
+        "address": "苏州市姑苏区观前街",
+        "open_year": "2001‑08‑08",
+        "close_year": "2023‑04‑30",
+        "status_key": "moved_same_building",
+        "status": "观前街古街内门店；同楼搬迁；苏州老字号商业地标",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "苏州市姑苏区观前街原址",
+            "open_year": "2001‑08‑08",
+            "close_year": "2023‑04‑30",
+            "coordinates": [120.6197, 31.2990],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "同楼搬迁",
+            "address": "苏州市姑苏区观前街同楼新铺位",
+            "open_year": "2023‑05‑01",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [120.3826, 36.0671]
+      },
+      "properties": {
+        "name": "麦当劳 青岛中山路店",
+        "region": "中国‑山东省",
+        "city": "青岛",
+        "address": "青岛市市南区中山路",
+        "open_year": "2002‑10‑01",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "青岛百年中山路商业街上的麦当劳门店；德式建筑旁的现代快餐地标",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "青岛市市南区中山路",
+            "open_year": "2002‑10‑01",
+            "close_year": "营业中",
+            "coordinates": [120.3826, 36.0671],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [108.9402, 34.3416]
+      },
+      "properties": {
+        "name": "麦当劳 西安钟楼店",
+        "region": "中国‑陕西省",
+        "city": "西安",
+        "address": "西安市碑林区钟楼商圈",
+        "open_year": "2003‑06‑18",
+        "close_year": "2022‑10‑20",
+        "status_key": "moved_far_away",
+        "status": "钟楼商圈老牌门店；迁至城南新商圈；西安古城商业变迁缩影",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "西安市碑林区钟楼商圈原址",
+            "open_year": "2003‑06‑18",
+            "close_year": "2022‑10‑20",
+            "coordinates": [108.9402, 34.3416],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "城南新址",
+            "address": "西安市雁塔区城南新商圈",
+            "open_year": "2022‑10‑21",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [104.0665, 30.5728]
+      },
+      "properties": {
+        "name": "麦当劳 成都春熙路店",
+        "region": "中国‑四川省",
+        "city": "成都",
+        "address": "成都市锦江区春熙路",
+        "open_year": "2004‑12‑24",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "春熙路步行街核心门店；成都麦当劳代表性门店",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "成都市锦江区春熙路",
+            "open_year": "2004‑12‑24",
+            "close_year": "营业中",
+            "coordinates": [104.0665, 30.5728],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [113.8244, 22.6969]
+      },
+      "properties": {
+        "name": "麦当劳 东莞虎门店",
+        "region": "中国‑广东省",
+        "city": "东莞",
+        "address": "东莞市虎门镇",
+        "open_year": "2005‑04‑16",
+        "close_year": "2023‑08‑12",
+        "status_key": "building_gone",
+        "status": "虎门镇老牌门店；原建筑已拆除改建；珠三角县域商业变迁",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "东莞市虎门镇原址",
+            "open_year": "2005‑04‑16",
+            "close_year": "2023‑08‑12",
+            "coordinates": [113.8244, 22.6969],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [118.7969, 32.0603]
+      },
+      "properties": {
+        "name": "麦当劳 南京新街口店",
+        "region": "中国‑江苏省",
+        "city": "南京",
+        "address": "南京市玄武区新街口",
+        "open_year": "1998‑11‑28",
+        "close_year": "2023‑02‑28",
+        "status_key": "moved_same_building",
+        "status": "新街口商圈老店；同楼搬迁至新装修区域；南京商业地标变迁",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "南京市玄武区新街口原址",
+            "open_year": "1998‑11‑28",
+            "close_year": "2023‑02‑28",
+            "coordinates": [118.7969, 32.0603],
+            "photo_url": ""
+          },
+          {
+            "seq": 2,
+            "label": "同楼搬迁",
+            "address": "南京市玄武区新街口同楼新铺位",
+            "open_year": "2023‑03‑01",
+            "close_year": "营业中",
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [121.5090, 25.0376]
+      },
+      "properties": {
+        "name": "麦当劳 台北台北车站店",
+        "region": "中国‑台湾省",
+        "city": "台北",
+        "address": "台北市中正区台北车站",
+        "open_year": "1989‑07‑14",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "台北车站商圈核心门店；台湾麦当劳旗舰级门店之一",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "台北市中正区台北车站",
+            "open_year": "1989‑07‑14",
+            "close_year": "营业中",
+            "coordinates": [121.5090, 25.0376],
+            "photo_url": ""
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [114.2319, 22.3119]
+      },
+      "properties": {
+        "name": "麦当劳 香港旺角店",
+        "region": "香港特别行政区",
+        "city": "香港",
+        "address": "香港旺角波鞋街",
+        "open_year": "1978‑05‑12",
+        "close_year": "2020‑12‑31",
+        "status_key": "building_gone",
+        "status": "旺角波鞋街老店；原建筑已拆除；香港麦当劳历史最悠久门店之一",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "香港旺角波鞋街原址",
+            "open_year": "1978‑05‑12",
+            "close_year": "2020‑12‑31",
+            "coordinates": [114.2319, 22.3119],
+            "photo_url": ""
+          }
+        ]
+      }
+    }
+  ]
+}
