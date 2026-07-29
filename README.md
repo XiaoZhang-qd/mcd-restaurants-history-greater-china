@@ -178,7 +178,7 @@ mcd-history-greater-china/
 1. 将所有文件推送到 GitHub 仓库
 2. 进入仓库 → **Settings** → **Pages**
 3. Source 选择 `main` 分支 / `root` 目录
-4. 保存后访问 `https://xiaozhang-qd.github.io/mcd-restaurants-history-greater-china/`
+4. 保存后访问 `https://yourname.github.io/mcd-restaurants-history-greater-china/`
 
 ## 📄 开源协议
 
