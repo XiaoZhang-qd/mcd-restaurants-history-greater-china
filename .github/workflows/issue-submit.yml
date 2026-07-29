@@ -35,6 +35,45 @@ jobs:
                   return val
               return ""
 
+          def get_multi_field(body, key):
+              pattern = rf'^{re.escape(key)}:\s*(.*?)$'
+              m = re.search(pattern, body, re.MULTILINE)
+              if not m:
+                  return []
+              inline = m.group(1).strip()
+              results = []
+              if inline and inline not in ('___', '未填', '未知'):
+                  for part in re.split(r'[,，]', inline):
+                      part = part.strip()
+                      if part and part not in ('___', '未填', '未知'):
+                          results.append(part)
+              pos = m.end()
+              rest = body[pos:]
+              for line in rest.split('\n'):
+                  line = line.strip()
+                  if not line:
+                      if results:
+                          break
+                      continue
+                  if re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*\s*:', line):
+                      break
+                  if line.startswith('#'):
+                      continue
+                  for part in re.split(r'[,，]', line):
+                      part = part.strip()
+                      if part and part not in ('___', '未填', '未知'):
+                          results.append(part)
+              return results
+
+          def get_photo_urls(body):
+              urls = get_multi_field(body, 'photo_urls')
+              if urls:
+                  return urls
+              single = get_field(body, 'photo_url')
+              if single:
+                  return [single]
+              return []
+
           def get_coord_field(body, key):
               pattern = rf'^{re.escape(key)}:\s*\[([\d\.\-]+),\s*([\d\.\-]+)\]'
               m = re.search(pattern, body, re.MULTILINE)
@@ -50,7 +89,7 @@ jobs:
           close_year = get_field(issue_body, 'close_year')
           status_key = get_field(issue_body, 'status_key')
           status = get_field(issue_body, 'status')
-          photo_url = get_field(issue_body, 'photo_url')
+          photo_urls = get_photo_urls(issue_body)
 
           valid_keys = ['still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone']
           if status_key not in valid_keys:
@@ -70,7 +109,11 @@ jobs:
               loc_open = get_field(issue_body, f'location_{n}_open_year')
               loc_close = get_field(issue_body, f'location_{n}_close_year')
               loc_coord = get_coord_field(issue_body, f'location_{n}_coordinates')
-              loc_photo = get_field(issue_body, f'location_{n}_photo_url')
+              loc_photo_urls = get_multi_field(issue_body, f'location_{n}_photo_urls')
+              if not loc_photo_urls:
+                  loc_single = get_field(issue_body, f'location_{n}_photo_url')
+                  if loc_single:
+                      loc_photo_urls = [loc_single]
 
               loc_entry = {
                   "seq": n,
@@ -81,8 +124,8 @@ jobs:
               }
               if loc_coord:
                   loc_entry["coordinates"] = loc_coord
-              if loc_photo:
-                  loc_entry["photo_url"] = loc_photo
+              if loc_photo_urls:
+                  loc_entry["photo_urls"] = loc_photo_urls
               locations.append(loc_entry)
 
           # 确定特征坐标：优先使用最后一个 location 的坐标，其次第一个，最后 fallback
@@ -116,7 +159,7 @@ jobs:
               "close_year": close_year or "",
               "status_key": status_key,
               "status": status or "待人工补充",
-              "photo_url": photo_url or ""
+              "photo_urls": photo_urls
           }
 
           if locations:

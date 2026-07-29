@@ -21,8 +21,10 @@ open_year:
 close_year: 
 status_key: 
 status: 
-photo_url: 
+photo_urls: 
 ```
+
+> 💡 多张照片请每行填一个 URL，或用英文逗号分隔
 
 ### 📍 历史变迁（有序填写，从原址到现状）
 
@@ -37,7 +39,7 @@ location_1_address:
 location_1_open_year: 
 location_1_close_year: 
 location_1_coordinates: 
-location_1_photo_url: 
+location_1_photo_urls: 
 
 # 第 2 项：第一次搬迁（如有）
 location_2_label: 
@@ -45,7 +47,7 @@ location_2_address:
 location_2_open_year: 
 location_2_close_year: 
 location_2_coordinates: 
-location_2_photo_url: 
+location_2_photo_urls: 
 
 # 第 3 项：第二次搬迁（如有，以此类推）
 location_3_label: 
@@ -53,5 +55,7 @@ location_3_address:
 location_3_open_year: 
 location_3_close_year: 
 location_3_coordinates: 
-location_3_photo_url: 
+location_3_photo_urls: 
 ```
+
+> 💡 多张照片请每行填一个 URL，或用英文逗号分隔

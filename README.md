@@ -47,8 +47,9 @@ mcd-history-greater-china/
 ├── README.md                     # 项目说明
 └── .github/
     ├── workflows/
-    │   └── issue-submit.yml      # GitHub Actions 投稿解析
+    │   └── issue-submit.yml      # GitHub Actions 投稿解析工作流
     └── ISSUE_TEMPLATE/
+        ├── config.yml   # 投稿模板配置
         └── old-store-submit.md   # 投稿模板
 ```
 
@@ -68,7 +69,7 @@ mcd-history-greater-china/
 | `close_year` | string | ✅ | 原址结业/搬迁时间 | `2010‑03‑31` 或 `营业中` |
 | `status_key` | string | ✅ | 状态键（见下方） | `moved_same_building` |
 | `status` | string | ✅ | 完整历史描述 | `大楼尚存；商号搬迁至本大厦二楼...` |
-| `photo_url` | string | ❌ | 当前门店老照片链接（可为空） | `https://...`/`http://...` |
+| `photo_urls` | string[] | ❌ | 当前门店老照片链接数组，支持多张照片 | `["https://...","http://..."]` |
 | `locations` | array | ❌ | 有序历史变迁序列（见下方） | 见[locations数组说明](#locations数组说明) |
 
 ### locations 数组（历史变迁序列）
@@ -83,7 +84,7 @@ mcd-history-greater-china/
 | `open_year` | string | ❌ | 该位置的开业时间 |
 | `close_year` | string | ❌ | 该位置的结业/搬迁时间 |
 | `coordinates` | [lng, lat] | ❌ | 该位置的 WGS-84 GPS 坐标 |
-| `photo_url` | string | ❌ | 该位置的老照片链接 |
+| `photo_urls` | string[] | ❌ | 该位置的老照片链接数组，支持多张照片 |
 
 ### status_key 状态枚举
 
@@ -112,7 +113,7 @@ mcd-history-greater-china/
     "close_year": "2010‑03‑31",
     "status_key": "moved_same_building",
     "status": "大楼尚存；商号搬迁至本大厦二楼；首层现为银行酒馆，无纪念牌匾",
-    "photo_url": "",
+    "photo_urls": [],
     "locations": [
       {
         "seq": 1,
@@ -121,7 +122,7 @@ mcd-history-greater-china/
         "open_year": "1993‑02‑20",
         "close_year": "2010‑03‑31",
         "coordinates": [113.2644, 23.1291],
-        "photo_url": ""
+        "photo_urls": []
       },
       {
         "seq": 2,
@@ -129,7 +130,7 @@ mcd-history-greater-china/
         "address": "广州市越秀区环市东路 63 层广东国际大厦二楼",
         "open_year": "2010‑04‑01",
         "close_year": "营业中",
-        "photo_url": ""
+        "photo_urls": []
       }
     ]
   }
