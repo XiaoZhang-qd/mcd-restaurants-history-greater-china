@@ -17,7 +17,7 @@ assignees: ""
 
 ## 投稿方法
 
-### 通过 GitHub Issue 投稿，进入[https://github.com/xiaozhang-qd/mcdonalds-restaurants-history-greater-china/issues/new?template=old-store-submit.md](https://github.com/xiaozhang-qd/mcdonalds-restaurants-history-greater-china/issues/new?template=old-store-submit.md)
+### 通过 GitHub Issue 投稿，进入[https://github.com/xiaozhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md](https://github.com/xiaozhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md)
 
 ## 📋 请按以下格式填写（严格遵循字段名，方便自动解析）
 
