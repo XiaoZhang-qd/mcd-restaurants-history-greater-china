@@ -300,13 +300,13 @@ jobs:
           from email.mime.multipart import MIMEMultipart
           from email.header import Header
 
-          smtp_server = os.environ.get('SMTP_SERVER_SEC', '')
-          smtp_port = int(os.environ.get('SMTP_PORT_SEC', '465'))
-          smtp_secure = os.environ.get('SMTP_SECURE_SEC', 'true').lower() == 'true'
-          username = os.environ.get('SMTP_USERNAME_SEC', '')
-          password = os.environ.get('SMTP_PASSWORD_SEC', '')
-          mail_from = os.environ.get('MAIL_FROM_SEC', '')
-          mail_to = os.environ.get('MAIL_TO_SEC', '')
+          smtp_server = os.environ.get('SMTP_SERVER_SEC', '') or ''
+          smtp_port = int(os.environ.get('SMTP_PORT_SEC', '') or '465')
+          smtp_secure = (os.environ.get('SMTP_SECURE_SEC', '') or 'true').lower() == 'true'
+          username = os.environ.get('SMTP_USERNAME_SEC', '') or ''
+          password = os.environ.get('SMTP_PASSWORD_SEC', '') or ''
+          mail_from = os.environ.get('MAIL_FROM_SEC', '') or ''
+          mail_to = os.environ.get('MAIL_TO_SEC', '') or ''
           issue_title = os.environ.get('ISSUE_TITLE', '')
           issue_url = os.environ.get('ISSUE_URL', '')
           issue_number = os.environ.get('ISSUE_NUMBER', '')
