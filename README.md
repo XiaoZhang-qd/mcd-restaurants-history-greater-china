@@ -217,6 +217,6 @@ mcd-history-greater-china/
 3. Source 选择 `main` 分支 / `root` 目录
 4. 保存后访问 `https://yourname.github.io/mcd-restaurants-history-greater-china/`
 
-## 📄 开源协议
+本项目基于 [MIT License](LICENSE) 开源，鼓励个人与非商业用途的使用、修改与分发。如需将本项目用于商业用途，请联系项目维护者获取授权。
 
-本项目数据仅供参考学习使用。
+如果你觉得这个项目有意思，欢迎点个 ⭐ Star 支持我们持续更新！
