@@ -11,6 +11,14 @@ permissions:
 jobs:
   parse-and-notify:
     runs-on: ubuntu-latest
+    env:
+      MAIL_FROM_SEC: ${{ secrets.MAIL_FROM }}
+      MAIL_TO_SEC: ${{ secrets.MAIL_TO }}
+      SMTP_SERVER_SEC: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT_SEC: ${{ secrets.SMTP_PORT }}
+      SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
+      SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
     steps:
       - name: 安装 Python
         uses: actions/setup-python@v5
@@ -226,22 +234,7 @@ jobs:
           ISSUE_URL: ${{ github.event.issue.html_url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUBMITTER: ${{ github.event.issue.user.login }}
-          MAIL_FROM_SEC: ${{ secrets.MAIL_FROM }}
-          MAIL_TO_SEC: ${{ secrets.MAIL_TO }}
-          SMTP_SERVER_SEC: ${{ secrets.SMTP_SERVER }}
-          SMTP_PORT_SEC: ${{ secrets.SMTP_PORT }}
-          SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
-          SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
-        run: |
-          python3 parse_issue.py
-          echo "MAIL_FROM_SEC=$MAIL_FROM_SEC" >> $GITHUB_ENV
-          echo "MAIL_TO_SEC=$MAIL_TO_SEC" >> $GITHUB_ENV
-          echo "SMTP_SERVER_SEC=$SMTP_SERVER_SEC" >> $GITHUB_ENV
-          echo "SMTP_PORT_SEC=$SMTP_PORT_SEC" >> $GITHUB_ENV
-          echo "SMTP_SECURE_SEC=$SMTP_SECURE_SEC" >> $GITHUB_ENV
-          echo "SMTP_USERNAME_SEC=$SMTP_USERNAME_SEC" >> $GITHUB_ENV
-          echo "SMTP_PASSWORD_SEC=$SMTP_PASSWORD_SEC" >> $GITHUB_ENV
+        run: python3 parse_issue.py
 
       - name: 输出解析结果
         run: |
@@ -265,31 +258,109 @@ jobs:
             echo "   需要配置: SMTP_SERVER, SMTP_PORT, SMTP_SECURE, SMTP_USERNAME, SMTP_PASSWORD, MAIL_FROM, MAIL_TO"
           fi
 
+      - name: 写入邮件脚本
+        run: |
+          cat << 'EMAILSCRIPT' > send_email.py
+          import smtplib, ssl, os, sys
+          from email.mime.text import MIMEText
+          from email.mime.multipart import MIMEMultipart
+          from email.header import Header
+
+          smtp_server = os.environ.get('SMTP_SERVER_SEC', '')
+          smtp_port = int(os.environ.get('SMTP_PORT_SEC', '465'))
+          smtp_secure = os.environ.get('SMTP_SECURE_SEC', 'true').lower() == 'true'
+          username = os.environ.get('SMTP_USERNAME_SEC', '')
+          password = os.environ.get('SMTP_PASSWORD_SEC', '')
+          mail_from = os.environ.get('MAIL_FROM_SEC', '')
+          mail_to = os.environ.get('MAIL_TO_SEC', '')
+          feature_json = os.environ.get('FEATURE_JSON', '')
+          issue_title = os.environ.get('ISSUE_TITLE', '')
+          issue_url = os.environ.get('ISSUE_URL', '')
+          issue_number = os.environ.get('ISSUE_NUMBER', '')
+          submitter = os.environ.get('SUBMITTER', '')
+
+          if not smtp_server or not username or not password or not mail_from or not mail_to:
+              print('SMTP secrets missing, skip sending')
+              sys.exit(0)
+
+          subject = Header('【麦当劳旧址投稿】#' + issue_number + ' ' + issue_title, 'utf-8')
+          body_lines = [
+              '🔔 仓库收到新门店投稿！',
+              '',
+              'Issue 链接：' + issue_url,
+              '投稿人：' + submitter,
+              '',
+              '=====================',
+              '自动生成待审核 GeoJSON Feature：',
+              '```json',
+              feature_json,
+              '```',
+              '',
+              '=====================',
+              '请登录 GitHub 审核后合并至 data/sample.geojson',
+              '',
+              '—— 麦当劳旧址档案项目机器人',
+          ]
+          body_text = '\n'.join(body_lines)
+
+          msg = MIMEMultipart('alternative')
+          msg['Subject'] = subject
+          msg['From'] = mail_from
+          msg['To'] = mail_to
+
+          html_body = body_text.replace('\n', '<br>')
+          html_body = html_body.replace('```json', '<pre>').replace('```', '</pre>')
+          msg.attach(MIMEText(body_text, 'plain', 'utf-8'))
+          msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
+          recipients = [addr.strip() for addr in mail_to.split(',')]
+
+          try:
+              if smtp_secure:
+                  print('Connecting to ' + smtp_server + ':' + str(smtp_port) + ' via SSL...')
+                  context = ssl.create_default_context()
+                  with smtplib.SMTP_SSL(smtp_server, smtp_port, context=context, timeout=30) as server:
+                      server.login(username, password)
+                      server.sendmail(mail_from, recipients, msg.as_string())
+                  print('OK: Email sent via SSL')
+              else:
+                  print('Connecting to ' + smtp_server + ':' + str(smtp_port) + ' via STARTTLS...')
+                  with smtplib.SMTP(smtp_server, smtp_port, timeout=30) as server:
+                      server.ehlo()
+                      server.starttls(context=ssl.create_default_context())
+                      server.ehlo()
+                      server.login(username, password)
+                      server.sendmail(mail_from, recipients, msg.as_string())
+                  print('OK: Email sent via STARTTLS')
+          except smtplib.SMTPAuthenticationError as e:
+              print('FAIL: SMTP auth failed: ' + str(e))
+              print('Check SMTP_USERNAME and SMTP_PASSWORD (QQ mail needs authorization code)')
+              sys.exit(1)
+          except smtplib.SMTPRecipientsRefused as e:
+              print('FAIL: Recipient refused: ' + str(e))
+              sys.exit(1)
+          except smtplib.SMTPException as e:
+              print('FAIL: SMTP error: ' + str(e))
+              sys.exit(1)
+          except Exception as e:
+              print('FAIL: Connection error: ' + type(e).__name__ + ': ' + str(e))
+              print('Possible causes: wrong port/encryption, bad auth code, network issue')
+              sys.exit(1)
+          EMAILSCRIPT
+
       - name: 发送邮件通知
         if: ${{ env.FEATURE_NAME != '' && env.MAIL_FROM_SEC != '' }}
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          secure: ${{ secrets.SMTP_SECURE }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "【麦当劳旧址投稿】#${{ github.event.issue.number }} ${{ github.event.issue.title }}"
-          to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_FROM }}
-          body: |
-            🔔 仓库收到新门店投稿！
-
-            Issue 链接：${{ github.event.issue.html_url }}
-            投稿人：${{ github.event.issue.user.login }}
-
-            =====================
-            自动生成待审核 GeoJSON Feature：
-            ```json
-            ${{ env.FEATURE_JSON }}
-            ```
-
-            =====================
-            请登录 GitHub 审核后合并至 data/sample.geojson
-
-            —— 麦当劳旧址档案项目机器人
+        env:
+          SMTP_SERVER_SEC: ${{ env.SMTP_SERVER_SEC }}
+          SMTP_PORT_SEC: ${{ env.SMTP_PORT_SEC }}
+          SMTP_SECURE_SEC: ${{ env.SMTP_SECURE_SEC }}
+          SMTP_USERNAME_SEC: ${{ env.SMTP_USERNAME_SEC }}
+          SMTP_PASSWORD_SEC: ${{ env.SMTP_PASSWORD_SEC }}
+          MAIL_FROM_SEC: ${{ env.MAIL_FROM_SEC }}
+          MAIL_TO_SEC: ${{ env.MAIL_TO_SEC }}
+          ISSUE_TITLE: ${{ env.ISSUE_TITLE }}
+          ISSUE_URL: ${{ env.ISSUE_URL }}
+          ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
+          SUBMITTER: ${{ env.SUBMITTER }}
+          FEATURE_JSON: ${{ env.FEATURE_JSON }}
+        run: python3 send_email.py
