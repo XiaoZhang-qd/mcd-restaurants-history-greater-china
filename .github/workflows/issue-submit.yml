@@ -212,9 +212,11 @@ jobs:
           echo "=== Feature JSON ==="
           cat feature_output.txt
           echo "=== 输出到 GITHUB_ENV ==="
-          echo 'FEATURE_JSON<<EOF' >> $GITHUB_ENV
-          cat feature_output.txt >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          {
+            echo 'FEATURE_JSON<<EOF'
+            cat feature_output.txt
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
 
       - name: 发送邮件通知
         if: ${{ env.FEATURE_JSON != '' && secrets.MAIL_FROM != '' }}
@@ -238,9 +240,3 @@ jobs:
             自动生成待审核 GeoJSON Feature：
             ```json
             ${{ env.FEATURE_JSON }}
-            ```
-
-            =====================
-            请登录 GitHub 审核后合并至 data/sample.geojson
-
-            —— 麦当劳旧址档案项目机器人
