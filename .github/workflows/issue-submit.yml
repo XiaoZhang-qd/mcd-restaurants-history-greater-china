@@ -19,6 +19,10 @@ jobs:
       SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
       SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
       SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
+      ISSUE_TITLE: ${{ github.event.issue.title }}
+      ISSUE_URL: ${{ github.event.issue.html_url }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      SUBMITTER: ${{ github.event.issue.user.login }}
     steps:
       - name: 安装 Python
         uses: actions/setup-python@v5
@@ -103,17 +107,19 @@ jobs:
 
           top_body, sections = split_top_level(body)
 
-          name = gf(top_body, 'name')
-          region = gf(top_body, 'region')
-          city = gf(top_body, 'city')
-          address = gf(top_body, 'address')
-          open_year = gf(top_body, 'open_year')
-          close_year = gf(top_body, 'close_year')
-          status_key = gf(top_body, 'status_key')
-          status = gf(top_body, 'status')
-          photo_urls = gmf(top_body, 'photo_urls')
+          first_section_body = sections[0][1] if sections else ''
+
+          name = gf(top_body, 'name') or gf(first_section_body, 'name')
+          region = gf(top_body, 'region') or gf(first_section_body, 'region')
+          city = gf(top_body, 'city') or gf(first_section_body, 'city')
+          address = gf(top_body, 'address') or gf(first_section_body, 'address')
+          open_year = gf(top_body, 'open_year') or gf(first_section_body, 'open_year')
+          close_year = gf(top_body, 'close_year') or gf(first_section_body, 'close_year')
+          status_key = gf(top_body, 'status_key') or gf(first_section_body, 'status_key')
+          status = gf(top_body, 'status') or gf(first_section_body, 'status')
+          photo_urls = gmf(top_body, 'photo_urls') or gmf(first_section_body, 'photo_urls')
           if not photo_urls:
-              single = gf(top_body, 'photo_url')
+              single = gf(top_body, 'photo_url') or gf(first_section_body, 'photo_url')
               photo_urls = [single] if single else []
 
           valid_keys = ('still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone')
@@ -137,16 +143,28 @@ jobs:
           loc_sections.sort(key=lambda x: x[0])
 
           for seq, sec in loc_sections:
-              loc = {
-                  'seq': seq,
-                  'label': gf(sec, f'location_{seq}_label') or f'位置{seq}',
-                  'address': gf(sec, f'location_{seq}_address') or '',
-                  'open_year': gf(sec, f'location_{seq}_open_year') or '',
-                  'close_year': gf(sec, f'location_{seq}_close_year') or '',
-              }
+              label_val = gf(sec, f'location_{seq}_label')
+              address_val = gf(sec, f'location_{seq}_address')
+              open_year_val = gf(sec, f'location_{seq}_open_year')
+              close_year_val = gf(sec, f'location_{seq}_close_year')
               coord_pat = re.compile(
                   r'location_' + str(seq) + r'_coordinates[ \t]*:[ \t]*\[([\d\.\-]+),[ \t]*([\d\.\-]+)\]')
               cm = coord_pat.search(sec)
+              if not cm:
+                  cm = re.search(r'\[([\d\.\-]+),[ \t]*([\d\.\-]+)\]', sec)
+
+              eff_label = label_val or gf(sec, 'name') or f'位置{seq}'
+              eff_address = address_val or gf(sec, 'address') or ''
+              eff_open_year = open_year_val or gf(sec, 'open_year') or ''
+              eff_close_year = close_year_val or gf(sec, 'close_year') or ''
+
+              loc = {
+                  'seq': seq,
+                  'label': eff_label,
+                  'address': eff_address,
+                  'open_year': eff_open_year,
+                  'close_year': eff_close_year,
+              }
               if cm:
                   loc['coordinates'] = [float(cm.group(1)), float(cm.group(2))]
               lp = gmf(sec, f'location_{seq}_photo_urls')
@@ -154,8 +172,17 @@ jobs:
                   single = gf(sec, f'location_{seq}_photo_url')
                   if single:
                       lp = [single]
+              if not lp:
+                  lp = gmf(sec, 'photo_urls')
+              if not lp:
+                  single = gf(sec, 'photo_url')
+                  if single:
+                      lp = [single]
               if lp:
                   loc['photo_urls'] = lp
+              has_data = eff_address or eff_open_year or eff_close_year or loc.get('coordinates') or lp
+              if not has_data:
+                  continue
               locations.append(loc)
 
           lng, lat = None, None
@@ -230,38 +257,29 @@ jobs:
       - name: 运行解析脚本
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
-          ISSUE_TITLE: ${{ github.event.issue.title }}
-          ISSUE_URL: ${{ github.event.issue.html_url }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          SUBMITTER: ${{ github.event.issue.user.login }}
         run: python3 parse_issue.py
 
       - name: 输出解析结果
         run: |
           echo "=== 解析结果 ==="
           cat result.json
-          echo "=== 环境变量 ==="
-          echo "FEATURE_NAME=$FEATURE_NAME"
-          echo "FEATURE_CITY=$FEATURE_CITY"
-          echo "FEATURE_STATUS=$FEATURE_STATUS"
-          echo "FEATURE_JSON=$FEATURE_JSON"
+          echo ""
+          echo "=== 解析摘要 ==="
+          python3 -c "import json; d=json.load(open('result.json','r',encoding='utf-8')); f=d['feature']['properties']; print(f'name: {f[\"name\"]}'); print(f'city: {f[\"city\"]}'); print(f'status: {f[\"status_key\"]}'); print(f'missing: {d[\"missing_fields\"]}')"
+          FN=$(python3 -c "import json; d=json.load(open('result.json','r',encoding='utf-8')); print(d['feature']['properties']['name'])")
+          echo "FEATURE_NAME=$FN"
           echo "=== Secrets 配置状态 ==="
-          if [ -n "$FEATURE_NAME" ] && [ "$FEATURE_NAME" != "未知门店" ]; then
-            echo "✅ 解析成功，FEATURE_NAME=$FEATURE_NAME"
-          else
-            echo "❌ 解析失败或字段缺失"
-          fi
-          if [ -n "$MAIL_FROM_SEC" ] && [ -n "$SMTP_SERVER_SEC" ] && [ -n "$SMTP_USERNAME_SEC" ]; then
+          if [ -n "$MAIL_FROM_SEC" ] && [ -n "$SMTP_SERVER_SEC" ] && [ -n "$SMTP_USERNAME_SEC" ] && [ -n "$SMTP_PASSWORD_SEC" ]; then
             echo "✅ SMTP secrets 已配置，将尝试发送邮件"
           else
             echo "⚠️ SMTP secrets 未完整配置，跳过邮件发送"
-            echo "   需要配置: SMTP_SERVER, SMTP_PORT, SMTP_SECURE, SMTP_USERNAME, SMTP_PASSWORD, MAIL_FROM, MAIL_TO"
+            echo "   需要配置 7 个 secrets: SMTP_SERVER, SMTP_PORT, SMTP_SECURE, SMTP_USERNAME, SMTP_PASSWORD, MAIL_FROM, MAIL_TO"
           fi
 
       - name: 写入邮件脚本
         run: |
           cat << 'EMAILSCRIPT' > send_email.py
-          import smtplib, ssl, os, sys
+          import smtplib, ssl, os, sys, json
           from email.mime.text import MIMEText
           from email.mime.multipart import MIMEMultipart
           from email.header import Header
@@ -273,11 +291,19 @@ jobs:
           password = os.environ.get('SMTP_PASSWORD_SEC', '')
           mail_from = os.environ.get('MAIL_FROM_SEC', '')
           mail_to = os.environ.get('MAIL_TO_SEC', '')
-          feature_json = os.environ.get('FEATURE_JSON', '')
           issue_title = os.environ.get('ISSUE_TITLE', '')
           issue_url = os.environ.get('ISSUE_URL', '')
           issue_number = os.environ.get('ISSUE_NUMBER', '')
           submitter = os.environ.get('SUBMITTER', '')
+
+          try:
+              with open('result.json', 'r', encoding='utf-8') as f:
+                  result = json.load(f)
+              feature_json = json.dumps(result['feature'], ensure_ascii=False)
+              feature_name = result['feature']['properties'].get('name', '')
+          except Exception as e:
+              print('FAIL: Cannot read result.json: ' + str(e))
+              sys.exit(1)
 
           if not smtp_server or not username or not password or not mail_from or not mail_to:
               print('SMTP secrets missing, skip sending')
@@ -349,18 +375,5 @@ jobs:
           EMAILSCRIPT
 
       - name: 发送邮件通知
-        if: ${{ env.FEATURE_NAME != '' && env.MAIL_FROM_SEC != '' }}
-        env:
-          SMTP_SERVER_SEC: ${{ env.SMTP_SERVER_SEC }}
-          SMTP_PORT_SEC: ${{ env.SMTP_PORT_SEC }}
-          SMTP_SECURE_SEC: ${{ env.SMTP_SECURE_SEC }}
-          SMTP_USERNAME_SEC: ${{ env.SMTP_USERNAME_SEC }}
-          SMTP_PASSWORD_SEC: ${{ env.SMTP_PASSWORD_SEC }}
-          MAIL_FROM_SEC: ${{ env.MAIL_FROM_SEC }}
-          MAIL_TO_SEC: ${{ env.MAIL_TO_SEC }}
-          ISSUE_TITLE: ${{ env.ISSUE_TITLE }}
-          ISSUE_URL: ${{ env.ISSUE_URL }}
-          ISSUE_NUMBER: ${{ env.ISSUE_NUMBER }}
-          SUBMITTER: ${{ env.SUBMITTER }}
-          FEATURE_JSON: ${{ env.FEATURE_JSON }}
+        if: ${{ env.MAIL_FROM_SEC != '' && env.SMTP_USERNAME_SEC != '' }}
         run: python3 send_email.py
