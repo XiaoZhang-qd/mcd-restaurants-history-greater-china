@@ -212,12 +212,12 @@ jobs:
           echo "=== Feature JSON ==="
           cat feature_output.txt
           echo "=== 输出到 GITHUB_ENV ==="
-          echo "FEATURE_JSON<<EOF" >> $GITHUB_ENV
+          echo 'FEATURE_JSON<<EOF' >> $GITHUB_ENV
           cat feature_output.txt >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: 发送邮件通知
-        if: always()
+        if: ${{ env.FEATURE_JSON != '' && secrets.MAIL_FROM != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}

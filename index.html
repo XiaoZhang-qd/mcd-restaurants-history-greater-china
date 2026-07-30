@@ -635,6 +635,35 @@
       .photo-gallery {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .leaflet-popup-content {
+        margin: 10px 12px;
+        max-height: 65vh;
+      }
+
+      .popup-title {
+        font-size: 14px;
+      }
+
+      .popup-row {
+        font-size: 12px;
+      }
+
+      .popup-label {
+        width: 60px;
+      }
+
+      .popup-status-text {
+        font-size: 11.5px;
+      }
+
+      .history-item {
+        font-size: 11.5px;
+      }
+
+      .history-address {
+        font-size: 11px;
+      }
     }
 
     /* ========== 加载提示 ========== */
@@ -893,6 +922,7 @@
       <option value="osm">🗺️ OSM 标准</option>
       <option value="gaode">🗺️ 高德街道</option>
       <option value="stamen">🏔️ Stamen 地形</option>
+      <option value="satellite">🛰️ 卫星影像</option>
     </select>
   </div>
 
@@ -971,6 +1001,29 @@
       return [mgLng, mgLat];
     }
 
+    function gcj02ToWgs84(lng, lat) {
+      if (outOfChina(lng, lat)) {
+        return [lng, lat];
+      }
+      let gLng = lng, gLat = lat;
+      let tempLng, tempLat;
+      for (let i = 0; i < 3; i++) {
+        tempLng = gLng;
+        tempLat = gLat;
+        const d = wgs84ToGcj02(tempLng, tempLat);
+        gLng = gLng - (d[0] - tempLng);
+        gLat = gLat - (d[1] - tempLat);
+      }
+      return [gLng, gLat];
+    }
+
+    function getPopupMaxWidth() {
+      var w = window.innerWidth;
+      if (w <= 480) return Math.min(Math.floor(w * 0.92), 380);
+      if (w <= 768) return Math.min(Math.floor(w * 0.80), 440);
+      return 340;
+    }
+
     /* ==================== 状态颜色映射 ==================== */
     const STATUS_COLORS = {
       still_open_original: '#2ecc71',
@@ -1027,24 +1080,24 @@
       minus.addEventListener('click', function (e) { e.stopPropagation(); map.zoomOut(); });
     })();
 
-    /* ==================== 三套底图 ==================== */
-    // 1. OpenStreetMap Standard（默认）
+    /* ==================== 四套底图 ==================== */
+    // 1. OpenStreetMap Standard（WGS-84 坐标系，默认）
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors',
       crossOrigin: true
     });
 
-    // 2. 高德街道地图（GCJ-02 坐标系，WGS-84 数据会有几十米偏移）
-    const gaodeLayer = L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
-      subdomains: '1234',
+    // 2. 高德街道地图（GCJ-02 坐标系）
+    const gaodeLayer = L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=7', {
+      subdomains: ['1', '2', '3', '4'],
       maxZoom: 18,
       minZoom: 3,
       attribution: '&copy; 高德地图',
       crossOrigin: true
     });
 
-    // 3. Stamen Terrain 地形地图（新版 URL）
+    // 3. Stamen Terrain 地形地图（WGS-84 坐标系）
     const stamenLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', {
       maxZoom: 18,
       minZoom: 3,
@@ -1052,50 +1105,75 @@
       crossOrigin: true
     });
 
+    // 4. 高德卫星影像（GCJ-02 坐标系，国内可访问）
+    const satelliteLayer = L.tileLayer('https://wprd0{s}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=6', {
+      subdomains: ['1', '2', '3', '4'],
+      maxZoom: 18,
+      minZoom: 3,
+      attribution: '&copy; 高德地图',
+      crossOrigin: true
+    });
+
     // 默认加载 OSM
     osmLayer.addTo(map);
 
-    // 底图切换逻辑
+    // 底图 → 坐标系映射
+    const BASAMAP_CRS = {
+      osm: 'wgs84',
+      stamen: 'wgs84',
+      gaode: 'gcj02',
+      satellite: 'gcj02'
+    };
+
+    // 底图切换逻辑（按坐标系分组转换）
     let currentBasemap = osmLayer;
     let currentBasemapKey = 'osm';
     const basemapSelect = document.getElementById('basemapSelect');
     
     basemapSelect.addEventListener('change', function (e) {
-      // 保存当前视图状态
-      const savedCenter = map.getCenter();
+      const value = e.target.value;
+      const targetCrs = BASAMAP_CRS[value] || 'wgs84';
+      const currentCrs = BASAMAP_CRS[currentBasemapKey] || 'wgs84';
+
+      const currentCenter = map.getCenter();
       const savedZoom = map.getZoom();
 
-      const value = e.target.value;
+      // 将当前中心点转为 WGS-84 统一存储
+      var centerWgs84;
+      if (currentCrs === 'gcj02') {
+        var rev = gcj02ToWgs84(currentCenter.lng, currentCenter.lat);
+        centerWgs84 = [rev[1], rev[0]];
+      } else {
+        centerWgs84 = [currentCenter.lat, currentCenter.lng];
+      }
+
       let newLayer = osmLayer;
-      
       if (value === 'gaode') newLayer = gaodeLayer;
       else if (value === 'stamen') newLayer = stamenLayer;
-      
+      else if (value === 'satellite') newLayer = satelliteLayer;
+
       if (currentBasemap) map.removeLayer(currentBasemap);
       newLayer.addTo(map);
       currentBasemap = newLayer;
       currentBasemapKey = value;
 
-      // 切换高德底图时，重新计算坐标（WGS-84 → GCJ-02）
-      if (value === 'gaode') {
+      if (targetCrs === 'gcj02') {
         allStores.forEach(function (store) {
           var latlng = store.wgs84Latlng;
           if (!latlng) return;
           var gcj = wgs84ToGcj02(latlng[1], latlng[0]);
           store.layer.setLatLng([gcj[1], gcj[0]]);
         });
+        var centerGcj = wgs84ToGcj02(centerWgs84[1], centerWgs84[0]);
+        map.setView([centerGcj[1], centerGcj[0]], savedZoom, { animate: false });
       } else {
-        // 切回 WGS-84 底图，恢复原始坐标
         allStores.forEach(function (store) {
-          var latlng = store.wgs84Latlng;
-          if (latlng) {
-            store.layer.setLatLng(latlng);
+          if (store.wgs84Latlng) {
+            store.layer.setLatLng(store.wgs84Latlng);
           }
         });
+        map.setView(centerWgs84, savedZoom, { animate: false });
       }
-
-      // 恢复之前的视图（保持缩放级别和中心位置）
-      map.setView(savedCenter, savedZoom, { animate: false });
     });
 
     /* ==================== 数据管理 ==================== */
@@ -1460,7 +1538,7 @@
           });
 
           marker.bindPopup(buildPopupContent(feature), {
-            maxWidth: 340,
+            maxWidth: getPopupMaxWidth(),
             className: 'custom-popup'
           });
 
@@ -1483,6 +1561,7 @@
           marker.addTo(map);
           processedCount++;
           updateLoadingProgress();
+          return storeEntry;
         }
 
         featuresToLoad.forEach(function (feature) {
@@ -1499,11 +1578,11 @@
               return;
             }
             var latlng = [result.lat, result.lng];
-            addFeatureMarker(item.feature, latlng, true);
+            var storeEntry = addFeatureMarker(item.feature, latlng, true);
 
-            if (currentBasemapKey === 'gaode') {
+            if (BASAMAP_CRS[currentBasemapKey] === 'gcj02') {
               var gcj = wgs84ToGcj02(result.lng, result.lat);
-              allStores[allStores.length - 1].layer.setLatLng([gcj[1], gcj[0]]);
+              storeEntry.layer.setLatLng([gcj[1], gcj[0]]);
             }
 
             applyFilter();
@@ -1723,7 +1802,15 @@
     let resizeTimer = null;
     window.addEventListener('resize', function () {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(applyMobileState, 150);
+      resizeTimer = setTimeout(function () {
+        applyMobileState();
+        var popupEl = document.querySelector('.leaflet-popup-content-wrapper');
+        if (popupEl) {
+          popupEl.style.maxWidth = getPopupMaxWidth() + 'px';
+          var popup = map._popup;
+          if (popup) popup.update();
+        }
+      }, 150);
     });
 
     applyMobileState();
