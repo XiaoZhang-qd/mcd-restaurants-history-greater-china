@@ -1079,15 +1079,18 @@
       // 切换高德底图时，重新计算坐标（WGS-84 → GCJ-02）
       if (value === 'gaode') {
         allStores.forEach(function (store) {
-          const coords = store.feature.geometry.coordinates;
-          const gcj = wgs84ToGcj02(coords[0], coords[1]);
+          var latlng = store.wgs84Latlng;
+          if (!latlng) return;
+          var gcj = wgs84ToGcj02(latlng[1], latlng[0]);
           store.layer.setLatLng([gcj[1], gcj[0]]);
         });
       } else {
         // 切回 WGS-84 底图，恢复原始坐标
         allStores.forEach(function (store) {
-          const coords = store.feature.geometry.coordinates;
-          store.layer.setLatLng([coords[1], coords[0]]);
+          var latlng = store.wgs84Latlng;
+          if (latlng) {
+            store.layer.setLatLng(latlng);
+          }
         });
       }
 
@@ -1300,6 +1303,100 @@
       openLightbox(urls, dataIndex);
     });
 
+    /* ==================== 地理编码模块 ====================
+    将地址文本转为地图坐标，支持无坐标数据的自动定位。
+    使用 Nominatim (OpenStreetMap) 免费地理编码服务，无需 API Key。 */
+
+    var GEOCODE_CACHE_KEY = 'mcd_geocode_cache_v1';
+    var geocodeCache = {};
+    try {
+      var saved = localStorage.getItem(GEOCODE_CACHE_KEY);
+      if (saved) geocodeCache = JSON.parse(saved) || {};
+    } catch (e) { geocodeCache = {}; }
+
+    function saveGeocodeCache() {
+      try {
+        localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(geocodeCache));
+      } catch (e) {}
+    }
+
+    function addressHash(str) {
+      var hash = 0;
+      for (var i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return 'g' + Math.abs(hash);
+    }
+
+    function buildGeocodeQuery(props) {
+      var parts = [];
+      if (props.region) parts.push(props.region);
+      if (props.city) parts.push(props.city);
+      if (props.address) parts.push(props.address);
+      if (parts.length === 0 && props.name) parts.push(props.name);
+      return parts.join(' ');
+    }
+
+    var geocodeQueue = [];
+    var geocodeProcessing = false;
+
+    function geocode(address, callback) {
+      var cacheKey = addressHash(address);
+      if (geocodeCache[cacheKey]) {
+        var cached = geocodeCache[cacheKey];
+        if (cached.success) {
+          callback(null, { lng: cached.lng, lat: cached.lat });
+        } else {
+          callback(new Error(cached.error || 'geocode failed'));
+        }
+        return;
+      }
+
+      geocodeQueue.push({ address: address, callback: callback, cacheKey: cacheKey });
+      processGeocodeQueue();
+    }
+
+    function processGeocodeQueue() {
+      if (geocodeProcessing) return;
+      if (geocodeQueue.length === 0) return;
+      geocodeProcessing = true;
+
+      var item = geocodeQueue.shift();
+      var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(item.address);
+
+      fetch(url, {
+        headers: { 'User-Agent': 'mcd-history-greater-china/1.0' }
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (results) {
+          if (results && results.length > 0) {
+            var r = results[0];
+            var lng = parseFloat(r.lon);
+            var lat = parseFloat(r.lat);
+            geocodeCache[item.cacheKey] = { success: true, lng: lng, lat: lat };
+            saveGeocodeCache();
+            item.callback(null, { lng: lng, lat: lat });
+          } else {
+            geocodeCache[item.cacheKey] = { success: false, error: 'No results' };
+            saveGeocodeCache();
+            item.callback(new Error('No geocoding results for: ' + item.address));
+          }
+        })
+        .catch(function (err) {
+          geocodeCache[item.cacheKey] = { success: false, error: err.message };
+          saveGeocodeCache();
+          item.callback(err);
+        })
+        .finally(function () {
+          geocodeProcessing = false;
+          setTimeout(processGeocodeQueue, 1100);
+        });
+    }
+
     /* ==================== 加载 GeoJSON 数据 ==================== */
     const loadingTip = document.getElementById('loadingTip');
     loadingTip.style.display = 'block';
@@ -1310,24 +1407,50 @@
         return res.json();
       })
       .then(function (data) {
-        loadingTip.style.display = 'none';
         if (!data.features || data.features.length === 0) {
-          console.warn('GeoJSON 数据为空或无要素。');
+          loadingTip.textContent = '⚠️ 数据为空';
           return;
         }
 
-        // 创建所有标记
+        var pendingGeocodes = [];
+        var featuresToLoad = [];
+
         data.features.forEach(function (feature) {
-          if (!feature.geometry) return;
+          var props = feature.properties || {};
+          var hasCoords = feature.geometry &&
+                          feature.geometry.coordinates &&
+                          feature.geometry.coordinates.length >= 2;
 
-          const coords = feature.geometry.coordinates; // [lng, lat]
-          if (!coords || coords.length < 2) return;
+          if (hasCoords) {
+            featuresToLoad.push(feature);
+          } else {
+            var query = buildGeocodeQuery(props);
+            if (query) {
+              pendingGeocodes.push({ feature: feature, query: query });
+            } else {
+              console.warn('⏭️ 跳过无坐标且无地址的门店：', props.name);
+            }
+          }
+        });
 
-          const latlng = [coords[1], coords[0]];
-          const statusKey = (feature.properties && (feature.properties.status_key || feature.properties.status)) || '';
-          const color = STATUS_COLORS[statusKey] || '#95a5a6';
+        var totalToProcess = featuresToLoad.length + pendingGeocodes.length;
+        var processedCount = 0;
 
-          const marker = L.circleMarker(latlng, {
+        function updateLoadingProgress() {
+          if (processedCount < totalToProcess) {
+            loadingTip.textContent = '正在加载门店数据... (' + processedCount + '/' + totalToProcess + ')';
+            loadingTip.style.display = 'block';
+          } else {
+            loadingTip.style.display = 'none';
+          }
+        }
+
+        function addFeatureMarker(feature, latlng, isGeocoded) {
+          var props = feature.properties || {};
+          var statusKey = props.status_key || props.status || '';
+          var color = STATUS_COLORS[statusKey] || '#95a5a6';
+
+          var marker = L.circleMarker(latlng, {
             radius: 8,
             color: color,
             weight: 2,
@@ -1341,23 +1464,71 @@
             className: 'custom-popup'
           });
 
-          marker.bindTooltip(feature.properties.name || '', {
+          marker.bindTooltip(props.name || '', {
             direction: 'top',
             offset: [0, -6],
             opacity: 0.85
           });
 
-          allStores.push({ feature: feature, layer: marker });
-        });
+          var storeEntry = { feature: feature, layer: marker, isGeocoded: !!isGeocoded };
 
-        applyFilter();
+          if (isGeocoded) {
+            storeEntry.wgs84Latlng = latlng;
+          } else {
+            var coords = feature.geometry.coordinates;
+            storeEntry.wgs84Latlng = [coords[1], coords[0]];
+          }
 
-        if (allStores.length > 0) {
-          const group = L.featureGroup(allStores.map(function (s) { return s.layer; }));
-          map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 12 });
+          allStores.push(storeEntry);
+          marker.addTo(map);
+          processedCount++;
+          updateLoadingProgress();
         }
 
-        console.log('✅ 成功加载 ' + allStores.length + ' 条门店数据');
+        featuresToLoad.forEach(function (feature) {
+          var coords = feature.geometry.coordinates;
+          addFeatureMarker(feature, [coords[1], coords[0]], false);
+        });
+
+        pendingGeocodes.forEach(function (item) {
+          geocode(item.query, function (err, result) {
+            if (err) {
+              console.warn('⚠️ 地理编码失败 [' + item.query + ']:', err.message);
+              processedCount++;
+              updateLoadingProgress();
+              return;
+            }
+            var latlng = [result.lat, result.lng];
+            addFeatureMarker(item.feature, latlng, true);
+
+            if (currentBasemapKey === 'gaode') {
+              var gcj = wgs84ToGcj02(result.lng, result.lat);
+              allStores[allStores.length - 1].layer.setLatLng([gcj[1], gcj[0]]);
+            }
+
+            applyFilter();
+          });
+        });
+
+        function finalizeLoading() {
+          if (allStores.length > 0) {
+            var group = L.featureGroup(allStores.map(function (s) { return s.layer; }));
+            map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 12 });
+          }
+          loadingTip.style.display = 'none';
+          console.log('✅ 加载完成 ' + allStores.length + ' 条门店数据');
+        }
+
+        var checkInterval = setInterval(function () {
+          if (processedCount >= totalToProcess || pendingGeocodes.length === 0) {
+            clearInterval(checkInterval);
+            setTimeout(finalizeLoading, 300);
+          }
+        }, 500);
+
+        if (pendingGeocodes.length === 0) {
+          finalizeLoading();
+        }
       })
       .catch(function (err) {
         loadingTip.style.display = 'none';

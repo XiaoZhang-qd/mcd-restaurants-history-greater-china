@@ -72,6 +72,8 @@ mcd-history-greater-china/
 | `photo_urls` | string[] | ❌ | 当前门店老照片链接数组，支持多张照片 | `["https://...","http://..."]` |
 | `locations` | array | ❌ | 有序历史变迁序列（见下方） | 见[locations数组说明](#locations数组说明) |
 
+> 💡 **坐标可选**：`geometry.coordinates` 为可选项。若未提供坐标，系统会使用 Nominatim 地理编码服务根据 `region` + `city` + `address` 自动解析位置。地理编码结果会缓存在浏览器中，二次加载速度更快。
+
 ### locations 数组（历史变迁序列）
 
 `locations` 数组按序号依次记录门店的搬迁历史，从 **1（原址）** 开始：
@@ -83,7 +85,7 @@ mcd-history-greater-china/
 | `address` | string | ✅ | 该位置的详细地址（支持纯文字） |
 | `open_year` | string | ❌ | 该位置的开业时间 |
 | `close_year` | string | ❌ | 该位置的结业/搬迁时间 |
-| `coordinates` | [lng, lat] | ❌ | 该位置的 WGS-84 GPS 坐标 |
+| `coordinates` | [lng, lat] | ❌ | 该位置的 WGS-84 GPS 坐标（可选，无则自动地理编码） |
 | `photo_urls` | string[] | ❌ | 该位置的老照片链接数组，支持多张照片 |
 
 ### status_key 状态枚举
@@ -138,6 +140,37 @@ mcd-history-greater-china/
 ```
 
 > ⚠️ **坐标系说明**：项目使用 **WGS-84** GPS 经纬度（标准 GPS 坐标）。地址字段支持纯文字描述，坐标仅用于地图定位。高德地图使用 GCJ-02 火星坐标系，切换到高德底图时坐标会自动转换。
+
+### 无坐标示例（仅地址，系统自动地理编码）
+
+```json
+{
+  "type": "Feature",
+  "properties": {
+    "name": "麦当劳 苏州观前街店",
+    "region": "中国‑江苏省",
+    "city": "苏州",
+    "address": "苏州市姑苏区观前街",
+    "open_year": "2001‑08‑08",
+    "close_year": "2023‑04‑30",
+    "status_key": "moved_same_building",
+    "status": "观前街古街内门店；同楼搬迁；苏州老字号商业地标",
+    "photo_urls": [],
+    "locations": [
+      {
+        "seq": 1,
+        "label": "原址",
+        "address": "苏州市姑苏区观前街原址",
+        "open_year": "2001‑08‑08",
+        "close_year": "2023‑04‑30",
+        "photo_urls": []
+      }
+    ]
+  }
+}
+```
+
+> 💡 不写 `geometry` 时，系统会用 `region` + `city` + `address` 作为查询词调用 Nominatim 地理编码服务。首次加载稍慢，结果会缓存在浏览器 localStorage 中。如需精确控制位置，仍建议手动提供坐标。
 
 ## 📮 投稿指南
 

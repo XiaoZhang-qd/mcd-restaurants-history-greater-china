@@ -128,15 +128,16 @@ jobs:
                   loc_entry["photo_urls"] = loc_photo_urls
               locations.append(loc_entry)
 
-          # 确定特征坐标：优先使用最后一个 location 的坐标，其次第一个，最后 fallback
-          feature_lng, feature_lat = 110.0, 30.0
+          # 确定特征坐标：优先使用最后一个 location 的坐标，其次第一个
+          # 坐标为可选项，若未提供则不创建 geometry（前端会自动地理编码）
+          feature_lng, feature_lat = None, None
           if locations:
               for i in range(len(locations) - 1, -1, -1):
                   if "coordinates" in locations[i]:
                       feature_lng = locations[i]["coordinates"][0]
                       feature_lat = locations[i]["coordinates"][1]
                       break
-          if feature_lng == 110.0:
+          if feature_lng is None:
               coord_pattern = r'\[([\d\.\-]+),\s*([\d\.\-]+)\]'
               coord_match = re.search(coord_pattern, issue_body)
               if coord_match:
@@ -167,12 +168,14 @@ jobs:
 
           feature = {
               "type": "Feature",
-              "geometry": {
-                  "type": "Point",
-                  "coordinates": [feature_lng, feature_lat]
-              },
               "properties": properties
           }
+
+          if feature_lng is not None and feature_lat is not None:
+              feature["geometry"] = {
+                  "type": "Point",
+                  "coordinates": [feature_lng, feature_lat]
+              }
 
           result = {
               "issue_title": """${{ github.event.issue.title }}""",
