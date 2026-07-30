@@ -391,5 +391,4 @@ jobs:
           EMAILSCRIPT
 
       - name: 发送邮件通知
-        if: ${{ env.MAIL_FROM_SEC != '' && env.SMTP_USERNAME_SEC != '' }}
         run: python3 send_email.py
