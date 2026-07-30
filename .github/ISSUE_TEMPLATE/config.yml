@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
   - name: 提交一家麦当劳旧址
-    url: https://github.com/xiaozhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md
+    url: https://github.com/XiaoZhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md
     about: 按模板格式提交门店的历史信息、照片和故事
   - name: 提出建议或反馈
     url: https://github.com/xiaozhang-qd/mcd-restaurants-history-greater-china/issues/new

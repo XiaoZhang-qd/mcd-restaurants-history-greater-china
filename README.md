@@ -146,7 +146,7 @@ mcd-history-greater-china/
 
 ### 方式一：通过 GitHub Issue 投稿（推荐）
 
-1. 点击 [👉 前往投稿](https://github.com/xiaozhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md)
+1. 点击 [👉 前往投稿](https://github.com/XiaoZhang-qd/mcd-restaurants-history-greater-china/issues/new?template=old-store-submit.md)
 2. 按照模板格式填写门店信息
 3. 提交 Issue 后，GitHub Actions 会自动：
    - 解析投稿内容

@@ -17,132 +17,149 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: 解析投稿内容
-        id: parser
+      - name: 写入解析脚本
         run: |
-          python3 << 'PYSCRIPT'
-          import re, json
+          cat << 'PYSCRIPT' > parse_issue.py
+          import re, json, os
 
-          issue_body = """${{ github.event.issue.body }}"""
+          body = os.environ.get('ISSUE_BODY', '')
+          title = os.environ.get('ISSUE_TITLE', '')
+          url = os.environ.get('ISSUE_URL', '')
+          number = os.environ.get('ISSUE_NUMBER', '0')
+          submitter = os.environ.get('SUBMITTER', '')
 
-          def get_field(body, key):
-              pattern = rf'^{re.escape(key)}:\s*(.+?)$'
-              m = re.search(pattern, body, re.MULTILINE)
-              if m:
-                  val = m.group(1).strip()
-                  if val in ('', '___', '未填', '未知'):
-                      return ""
-                  return val
-              return ""
+          FIELD_RE = re.compile(r'^[a-z][a-z0-9]*(_[a-z0-9]+)*:[ \t]*$', re.I)
+          SKIP_VALUES = ('', '___', '未填', '未知')
+          URL_RE = re.compile(r'^(https?://|ftp://|www\.)', re.I)
 
-          def get_multi_field(body, key):
-              pattern = rf'^{re.escape(key)}:\s*(.*?)$'
-              m = re.search(pattern, body, re.MULTILINE)
+          def split_top_level(text):
+              idx = text.find('\n# ')
+              if idx == -1:
+                  return text, []
+              top = text[:idx]
+              rest = text[idx+1:]
+              sections = []
+              pattern = re.compile(r'^#[ \t].+$', re.M)
+              matches = list(pattern.finditer(rest))
+              for i, m in enumerate(matches):
+                  start = m.end()
+                  end = matches[i+1].start() if i+1 < len(matches) else len(rest)
+                  sections.append((m.group(0).strip(), rest[start:end]))
+              return top, sections
+
+          def gf(text, key):
+              pat = re.compile(r'^' + re.escape(key) + r'[ \t]*:[ \t]*([^\r\n]*)', re.M)
+              m = pat.search(text)
+              if not m:
+                  return ''
+              val = m.group(1).strip()
+              if val in SKIP_VALUES:
+                  return ''
+              return val
+
+          def gmf(text, key):
+              pat = re.compile(r'^' + re.escape(key) + r'[ \t]*:[ \t]*([^\r\n]*)', re.M)
+              m = pat.search(text)
               if not m:
                   return []
-              inline = m.group(1).strip()
               results = []
-              if inline and inline not in ('___', '未填', '未知'):
+              inline = m.group(1).strip()
+              if inline and inline not in SKIP_VALUES and not inline.startswith('>') and not inline.startswith('💡'):
                   for part in re.split(r'[,，]', inline):
                       part = part.strip()
-                      if part and part not in ('___', '未填', '未知'):
+                      if part and part not in SKIP_VALUES and not part.startswith('>') and not part.startswith('💡'):
                           results.append(part)
-              pos = m.end()
-              rest = body[pos:]
-              for line in rest.split('\n'):
-                  line = line.strip()
-                  if not line:
+              tail = text[m.end():]
+              for line in tail.split('\n'):
+                  line = line.rstrip()
+                  stripped = line.strip()
+                  if not stripped:
+                      continue
+                  if FIELD_RE.match(line):
+                      break
+                  if stripped.startswith('#'):
+                      break
+                  if stripped.startswith('>'):
+                      continue
+                  if stripped.startswith('💡') or stripped.startswith('📍') or stripped.startswith('🔔'):
+                      continue
+                  if not URL_RE.match(stripped) and not stripped.startswith('http'):
                       if results:
                           break
                       continue
-                  if re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*\s*:', line):
-                      break
-                  if line.startswith('#'):
-                      continue
-                  for part in re.split(r'[,，]', line):
+                  for part in re.split(r'[,，]', stripped):
                       part = part.strip()
-                      if part and part not in ('___', '未填', '未知'):
+                      if part and part not in SKIP_VALUES and not part.startswith('>') and not part.startswith('💡'):
                           results.append(part)
               return results
 
-          def get_photo_urls(body):
-              urls = get_multi_field(body, 'photo_urls')
-              if urls:
-                  return urls
-              single = get_field(body, 'photo_url')
-              if single:
-                  return [single]
-              return []
+          top_body, sections = split_top_level(body)
 
-          def get_coord_field(body, key):
-              pattern = rf'^{re.escape(key)}:\s*\[([\d\.\-]+),\s*([\d\.\-]+)\]'
-              m = re.search(pattern, body, re.MULTILINE)
-              if m:
-                  return [float(m.group(1)), float(m.group(2))]
-              return None
+          name = gf(top_body, 'name')
+          region = gf(top_body, 'region')
+          city = gf(top_body, 'city')
+          address = gf(top_body, 'address')
+          open_year = gf(top_body, 'open_year')
+          close_year = gf(top_body, 'close_year')
+          status_key = gf(top_body, 'status_key')
+          status = gf(top_body, 'status')
+          photo_urls = gmf(top_body, 'photo_urls')
+          if not photo_urls:
+              single = gf(top_body, 'photo_url')
+              photo_urls = [single] if single else []
 
-          name = get_field(issue_body, 'name')
-          region = get_field(issue_body, 'region')
-          city = get_field(issue_body, 'city')
-          address = get_field(issue_body, 'address')
-          open_year = get_field(issue_body, 'open_year')
-          close_year = get_field(issue_body, 'close_year')
-          status_key = get_field(issue_body, 'status_key')
-          status = get_field(issue_body, 'status')
-          photo_urls = get_photo_urls(issue_body)
-
-          valid_keys = ['still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone']
+          valid_keys = ('still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone')
           if status_key not in valid_keys:
               status_key = 'pending-review'
 
-          # 解析历史变迁 locations 数组
           locations = []
-          max_seq = 0
-          loc_pattern = re.compile(r'^location_(\d+)_label:\s*(.+?)$', re.MULTILINE)
-          for m in loc_pattern.finditer(issue_body):
-              seq = int(m.group(1))
-              max_seq = max(max_seq, seq)
+          loc_sections = []
+          for sec_title, sec_body in sections:
+              label_match = re.search(r'location_(\d+)_label', sec_body)
+              if label_match:
+                  seq = int(label_match.group(1))
+              else:
+                  nm = re.search(r'第\s*(\d+)\s*项', sec_title)
+                  if nm:
+                      seq = int(nm.group(1))
+                  else:
+                      continue
+              loc_sections.append((seq, sec_body))
 
-          for n in range(1, max_seq + 1):
-              loc_label = get_field(issue_body, f'location_{n}_label')
-              loc_address = get_field(issue_body, f'location_{n}_address')
-              loc_open = get_field(issue_body, f'location_{n}_open_year')
-              loc_close = get_field(issue_body, f'location_{n}_close_year')
-              loc_coord = get_coord_field(issue_body, f'location_{n}_coordinates')
-              loc_photo_urls = get_multi_field(issue_body, f'location_{n}_photo_urls')
-              if not loc_photo_urls:
-                  loc_single = get_field(issue_body, f'location_{n}_photo_url')
-                  if loc_single:
-                      loc_photo_urls = [loc_single]
+          loc_sections.sort(key=lambda x: x[0])
 
-              loc_entry = {
-                  "seq": n,
-                  "label": loc_label or f"位置{n}",
-                  "address": loc_address or "",
-                  "open_year": loc_open or "",
-                  "close_year": loc_close or "",
+          for seq, sec in loc_sections:
+              loc = {
+                  'seq': seq,
+                  'label': gf(sec, f'location_{seq}_label') or f'位置{seq}',
+                  'address': gf(sec, f'location_{seq}_address') or '',
+                  'open_year': gf(sec, f'location_{seq}_open_year') or '',
+                  'close_year': gf(sec, f'location_{seq}_close_year') or '',
               }
-              if loc_coord:
-                  loc_entry["coordinates"] = loc_coord
-              if loc_photo_urls:
-                  loc_entry["photo_urls"] = loc_photo_urls
-              locations.append(loc_entry)
+              coord_pat = re.compile(
+                  r'location_' + str(seq) + r'_coordinates[ \t]*:[ \t]*\[([\d\.\-]+),[ \t]*([\d\.\-]+)\]')
+              cm = coord_pat.search(sec)
+              if cm:
+                  loc['coordinates'] = [float(cm.group(1)), float(cm.group(2))]
+              lp = gmf(sec, f'location_{seq}_photo_urls')
+              if not lp:
+                  single = gf(sec, f'location_{seq}_photo_url')
+                  if single:
+                      lp = [single]
+              if lp:
+                  loc['photo_urls'] = lp
+              locations.append(loc)
 
-          # 确定特征坐标：优先使用最后一个 location 的坐标，其次第一个
-          # 坐标为可选项，若未提供则不创建 geometry（前端会自动地理编码）
-          feature_lng, feature_lat = None, None
-          if locations:
-              for i in range(len(locations) - 1, -1, -1):
-                  if "coordinates" in locations[i]:
-                      feature_lng = locations[i]["coordinates"][0]
-                      feature_lat = locations[i]["coordinates"][1]
-                      break
-          if feature_lng is None:
-              coord_pattern = r'\[([\d\.\-]+),\s*([\d\.\-]+)\]'
-              coord_match = re.search(coord_pattern, issue_body)
-              if coord_match:
-                  feature_lng = float(coord_match.group(1))
-                  feature_lat = float(coord_match.group(2))
+          lng, lat = None, None
+          for i in range(len(locations) - 1, -1, -1):
+              if 'coordinates' in locations[i]:
+                  lng = locations[i]['coordinates'][0]
+                  lat = locations[i]['coordinates'][1]
+                  break
+          if lng is None:
+              cm = re.search(r'\[([\d\.\-]+),\s*([\d\.\-]+)\]', body)
+              if cm:
+                  lng, lat = float(cm.group(1)), float(cm.group(2))
 
           missing = []
           if not name: missing.append('name')
@@ -151,75 +168,78 @@ jobs:
           if not status: missing.append('status')
           if not address and not locations: missing.append('address/locations')
 
-          properties = {
-              "name": name or "待补充门店名称",
-              "region": region or "待人工补充",
-              "city": city or "待人工补充",
-              "address": address or "",
-              "open_year": open_year or "",
-              "close_year": close_year or "",
-              "status_key": status_key,
-              "status": status or "待人工补充",
-              "photo_urls": photo_urls
+          props = {
+              'name': name or '待补充门店名称',
+              'region': region or '待人工补充',
+              'city': city or '待人工补充',
+              'address': address or '',
+              'open_year': open_year or '',
+              'close_year': close_year or '',
+              'status_key': status_key,
+              'status': status or '待人工补充',
+              'photo_urls': photo_urls,
           }
-
           if locations:
-              properties["locations"] = locations
+              props['locations'] = locations
 
-          feature = {
-              "type": "Feature",
-              "properties": properties
-          }
-
-          if feature_lng is not None and feature_lat is not None:
-              feature["geometry"] = {
-                  "type": "Point",
-                  "coordinates": [feature_lng, feature_lat]
-              }
+          feat = {'type': 'Feature', 'properties': props}
+          if lng is not None and lat is not None:
+              feat['geometry'] = {'type': 'Point', 'coordinates': [lng, lat]}
 
           result = {
-              "issue_title": """${{ github.event.issue.title }}""",
-              "issue_url": """${{ github.event.issue.html_url }}""",
-              "issue_number": ${{ github.event.issue.number }},
-              "submitter": """${{ github.event.issue.user.login }}""",
-              "missing_fields": missing,
-              "parsed_feature": feature
+              'issue_title': title,
+              'issue_url': url,
+              'issue_number': int(number) if str(number).isdigit() else number,
+              'submitter': submitter,
+              'missing_fields': missing,
+              'feature': feat,
           }
 
-          with open("result.json", "w", encoding="utf-8") as f:
+          with open('result.json', 'w', encoding='utf-8') as f:
               json.dump(result, f, ensure_ascii=False, indent=2)
 
-          with open("feature_output.txt", "w", encoding="utf-8") as f:
-              f.write(json.dumps(feature, ensure_ascii=False, indent=2))
+          feat_json = json.dumps(feat, ensure_ascii=False)
+          ghenv = os.environ.get('GITHUB_ENV', '')
+          with open(ghenv, 'a', encoding='utf-8') as f:
+              f.write('FEATURE_NAME=' + (name or '未知门店') + '\n')
+              f.write('FEATURE_CITY=' + (city or '未知') + '\n')
+              f.write('FEATURE_STATUS=' + status_key + '\n')
+              f.write('FEATURE_JSON=' + feat_json + '\n')
 
-          import os
-          with open(os.environ.get('GITHUB_OUTPUT', 'github_output.txt'), 'a', encoding='utf-8') as out:
-              out.write(f"feature_name={name or '未知门店'}\n")
-              out.write(f"feature_city={city or '未知'}\n")
-              out.write(f"feature_status={status_key}\n")
-              out.write(f"missing_count={len(missing)}\n")
+          ghout = os.environ.get('GITHUB_OUTPUT', '')
+          with open(ghout, 'a', encoding='utf-8') as f:
+              f.write('feature_name=' + (name or '未知门店') + '\n')
+              f.write('feature_city=' + (city or '未知') + '\n')
+              f.write('feature_status=' + status_key + '\n')
+              f.write('missing_count=' + str(len(missing)) + '\n')
 
-          print("✅ 解析完成")
-          print(json.dumps(feature, ensure_ascii=False, indent=2))
+          print('DONE')
+          print(json.dumps(feat, ensure_ascii=False, indent=2))
           if missing:
-              print(f"⚠️ 缺少字段: {', '.join(missing)}")
+              print('MISSING: ' + ', '.join(missing))
           PYSCRIPT
 
-      - name: 读取解析结果
+      - name: 运行解析脚本
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SUBMITTER: ${{ github.event.issue.user.login }}
+        run: python3 parse_issue.py
+
+      - name: 输出解析结果
         run: |
           echo "=== 解析结果 ==="
           cat result.json
-          echo "=== Feature JSON ==="
-          cat feature_output.txt
-          echo "=== 输出到 GITHUB_ENV ==="
-          {
-            echo 'FEATURE_JSON<<EOF'
-            cat feature_output.txt
-            echo 'EOF'
-          } >> "$GITHUB_ENV"
+          echo "=== 环境变量 ==="
+          echo "FEATURE_NAME=$FEATURE_NAME"
+          echo "FEATURE_CITY=$FEATURE_CITY"
+          echo "FEATURE_STATUS=$FEATURE_STATUS"
+          echo "FEATURE_JSON=$FEATURE_JSON"
 
       - name: 发送邮件通知
-        if: ${{ env.FEATURE_JSON != '' && secrets.MAIL_FROM != '' }}
+        if: ${{ env.FEATURE_NAME != '' && secrets.MAIL_FROM != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: ${{ secrets.SMTP_SERVER }}
@@ -240,3 +260,9 @@ jobs:
             自动生成待审核 GeoJSON Feature：
             ```json
             ${{ env.FEATURE_JSON }}
+            ```
+
+            =====================
+            请登录 GitHub 审核后合并至 data/sample.geojson
+
+            —— 麦当劳旧址档案项目机器人
