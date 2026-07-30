@@ -11,6 +11,14 @@ permissions:
 jobs:
   parse-and-notify:
     runs-on: ubuntu-latest
+    env:
+      MAIL_FROM_SEC: ${{ secrets.MAIL_FROM }}
+      MAIL_TO_SEC: ${{ secrets.MAIL_TO }}
+      SMTP_SERVER_SEC: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT_SEC: ${{ secrets.SMTP_PORT }}
+      SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
+      SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
     steps:
       - name: 安装 Python
         uses: actions/setup-python@v5
@@ -239,17 +247,17 @@ jobs:
           echo "FEATURE_JSON=$FEATURE_JSON"
 
       - name: 发送邮件通知
-        if: ${{ env.FEATURE_NAME != '' && secrets.MAIL_FROM != '' }}
+        if: ${{ env.FEATURE_NAME != '' && env.MAIL_FROM_SEC != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: ${{ secrets.SMTP_PORT }}
-          secure: ${{ secrets.SMTP_SECURE }}
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          server_address: ${{ env.SMTP_SERVER_SEC }}
+          server_port: ${{ env.SMTP_PORT_SEC }}
+          secure: ${{ env.SMTP_SECURE_SEC }}
+          username: ${{ env.SMTP_USERNAME_SEC }}
+          password: ${{ env.SMTP_PASSWORD_SEC }}
           subject: "【麦当劳旧址投稿】#${{ github.event.issue.number }} ${{ github.event.issue.title }}"
-          to: ${{ secrets.MAIL_TO }}
-          from: ${{ secrets.MAIL_FROM }}
+          to: ${{ env.MAIL_TO_SEC }}
+          from: ${{ env.MAIL_FROM_SEC }}
           body: |
             🔔 仓库收到新门店投稿！
 
