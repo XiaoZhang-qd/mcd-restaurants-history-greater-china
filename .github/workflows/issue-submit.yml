@@ -11,14 +11,6 @@ permissions:
 jobs:
   parse-and-notify:
     runs-on: ubuntu-latest
-    env:
-      MAIL_FROM_SEC: ${{ secrets.MAIL_FROM }}
-      MAIL_TO_SEC: ${{ secrets.MAIL_TO }}
-      SMTP_SERVER_SEC: ${{ secrets.SMTP_SERVER }}
-      SMTP_PORT_SEC: ${{ secrets.SMTP_PORT }}
-      SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
-      SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
-      SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
     steps:
       - name: 安装 Python
         uses: actions/setup-python@v5
@@ -234,7 +226,22 @@ jobs:
           ISSUE_URL: ${{ github.event.issue.html_url }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           SUBMITTER: ${{ github.event.issue.user.login }}
-        run: python3 parse_issue.py
+          MAIL_FROM_SEC: ${{ secrets.MAIL_FROM }}
+          MAIL_TO_SEC: ${{ secrets.MAIL_TO }}
+          SMTP_SERVER_SEC: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT_SEC: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURE_SEC: ${{ secrets.SMTP_SECURE }}
+          SMTP_USERNAME_SEC: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD_SEC: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          python3 parse_issue.py
+          echo "MAIL_FROM_SEC=$MAIL_FROM_SEC" >> $GITHUB_ENV
+          echo "MAIL_TO_SEC=$MAIL_TO_SEC" >> $GITHUB_ENV
+          echo "SMTP_SERVER_SEC=$SMTP_SERVER_SEC" >> $GITHUB_ENV
+          echo "SMTP_PORT_SEC=$SMTP_PORT_SEC" >> $GITHUB_ENV
+          echo "SMTP_SECURE_SEC=$SMTP_SECURE_SEC" >> $GITHUB_ENV
+          echo "SMTP_USERNAME_SEC=$SMTP_USERNAME_SEC" >> $GITHUB_ENV
+          echo "SMTP_PASSWORD_SEC=$SMTP_PASSWORD_SEC" >> $GITHUB_ENV
 
       - name: 输出解析结果
         run: |
@@ -245,19 +252,31 @@ jobs:
           echo "FEATURE_CITY=$FEATURE_CITY"
           echo "FEATURE_STATUS=$FEATURE_STATUS"
           echo "FEATURE_JSON=$FEATURE_JSON"
+          echo "=== Secrets 配置状态 ==="
+          if [ -n "$FEATURE_NAME" ] && [ "$FEATURE_NAME" != "未知门店" ]; then
+            echo "✅ 解析成功，FEATURE_NAME=$FEATURE_NAME"
+          else
+            echo "❌ 解析失败或字段缺失"
+          fi
+          if [ -n "$MAIL_FROM_SEC" ] && [ -n "$SMTP_SERVER_SEC" ] && [ -n "$SMTP_USERNAME_SEC" ]; then
+            echo "✅ SMTP secrets 已配置，将尝试发送邮件"
+          else
+            echo "⚠️ SMTP secrets 未完整配置，跳过邮件发送"
+            echo "   需要配置: SMTP_SERVER, SMTP_PORT, SMTP_SECURE, SMTP_USERNAME, SMTP_PASSWORD, MAIL_FROM, MAIL_TO"
+          fi
 
       - name: 发送邮件通知
         if: ${{ env.FEATURE_NAME != '' && env.MAIL_FROM_SEC != '' }}
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: ${{ env.SMTP_SERVER_SEC }}
-          server_port: ${{ env.SMTP_PORT_SEC }}
-          secure: ${{ env.SMTP_SECURE_SEC }}
-          username: ${{ env.SMTP_USERNAME_SEC }}
-          password: ${{ env.SMTP_PASSWORD_SEC }}
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          secure: ${{ secrets.SMTP_SECURE }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
           subject: "【麦当劳旧址投稿】#${{ github.event.issue.number }} ${{ github.event.issue.title }}"
-          to: ${{ env.MAIL_TO_SEC }}
-          from: ${{ env.MAIL_FROM_SEC }}
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
           body: |
             🔔 仓库收到新门店投稿！
 
