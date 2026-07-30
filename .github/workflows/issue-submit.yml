@@ -32,7 +32,7 @@ jobs:
       - name: 写入解析脚本
         run: |
           cat << 'PYSCRIPT' > parse_issue.py
-          import re, json, os
+          import re, json, os, urllib.parse
 
           body = os.environ.get('ISSUE_BODY', '')
           title = os.environ.get('ISSUE_TITLE', '')
@@ -43,6 +43,19 @@ jobs:
           FIELD_RE = re.compile(r'^[a-z][a-z0-9]*(_[a-z0-9]+)*:[ \t]*$', re.I)
           SKIP_VALUES = ('', '___', '未填', '未知')
           URL_RE = re.compile(r'^(https?://|ftp://|www\.)', re.I)
+          GOOGLE_IMGRES_RE = re.compile(r'google\.com/imgres.*?[?&]imgurl=([^&]+)', re.I)
+
+          def clean_url(raw):
+              if not raw:
+                  return ''
+              url = raw.strip()
+              url = url.strip('`').strip('*').strip()
+              if url.startswith('>') or url.startswith('💡') or url.startswith('📍') or url.startswith('🔔'):
+                  return ''
+              gm = GOOGLE_IMGRES_RE.search(url)
+              if gm:
+                  url = urllib.parse.unquote(gm.group(1))
+              return url
 
           def split_top_level(text):
               idx = text.find('\n# ')
@@ -77,9 +90,9 @@ jobs:
               results = []
               inline = m.group(1).strip()
               if inline and inline not in SKIP_VALUES and not inline.startswith('>') and not inline.startswith('💡'):
-                  for part in re.split(r'[,，]', inline):
-                      part = part.strip()
-                      if part and part not in SKIP_VALUES and not part.startswith('>') and not part.startswith('💡'):
+                  for part in re.split(r'[,，\s]+', inline):
+                      part = clean_url(part)
+                      if part:
                           results.append(part)
               tail = text[m.end():]
               for line in tail.split('\n'):
@@ -99,9 +112,9 @@ jobs:
                       if results:
                           break
                       continue
-                  for part in re.split(r'[,，]', stripped):
-                      part = part.strip()
-                      if part and part not in SKIP_VALUES and not part.startswith('>') and not part.startswith('💡'):
+                  for part in re.split(r'[,，\s]+', stripped):
+                      part = clean_url(part)
+                      if part:
                           results.append(part)
               return results
 
@@ -120,7 +133,8 @@ jobs:
           photo_urls = gmf(top_body, 'photo_urls') or gmf(first_section_body, 'photo_urls')
           if not photo_urls:
               single = gf(top_body, 'photo_url') or gf(first_section_body, 'photo_url')
-              photo_urls = [single] if single else []
+              cu = clean_url(single)
+              photo_urls = [cu] if cu else []
 
           valid_keys = ('still_open_original', 'moved_same_building', 'moved_far_away', 'building_gone')
           if status_key not in valid_keys:
@@ -171,13 +185,15 @@ jobs:
               if not lp:
                   single = gf(sec, f'location_{seq}_photo_url')
                   if single:
-                      lp = [single]
+                      cu = clean_url(single)
+                      lp = [cu] if cu else []
               if not lp:
                   lp = gmf(sec, 'photo_urls')
               if not lp:
                   single = gf(sec, 'photo_url')
                   if single:
-                      lp = [single]
+                      cu = clean_url(single)
+                      lp = [cu] if cu else []
               if lp:
                   loc['photo_urls'] = lp
               has_data = eff_address or eff_open_year or eff_close_year or loc.get('coordinates') or lp
