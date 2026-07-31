@@ -88,12 +88,42 @@
       box-shadow: 0 6px 20px rgba(255, 107, 53, 0.45);
     }
 
+    .repo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: clamp(6px, 0.7vw, 8px);
+      padding: clamp(5px, 0.6vw, 8px) clamp(10px, 1.2vw, 14px);
+      background: rgba(36, 41, 47, 0.08);
+      color: #2c3e50;
+      font-size: clamp(11px, 1.1vw, 12.5px);
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: clamp(8px, 0.9vw, 10px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .repo-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .repo-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(36, 41, 47, 0.12);
+    }
+
     /* ========== 搜索框容器 ========== */
     .search-wrap {
       flex: 1;
       max-width: clamp(160px, 22vw, 300px);
       min-width: 0;
       position: relative;
+      z-index: 3;
     }
 
     .search-box {
@@ -103,6 +133,7 @@
       padding: 0 clamp(10px, 1vw, 14px);
       border: 1.5px solid rgba(0, 0, 0, 0.08);
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      min-width: 0;
     }
 
     .search-box:focus-within {
@@ -111,13 +142,14 @@
     }
 
     .search-box svg {
+      flex: 0 0 auto;
       flex-shrink: 0;
       margin-right: clamp(6px, 0.7vw, 10px);
       color: #7f8c8d;
     }
 
     .search-box input {
-      flex: 1;
+      flex: 1 1 auto;
       height: 100%;
       border: none;
       outline: none;
@@ -126,6 +158,9 @@
       color: #2c3e50;
       font-family: inherit;
       min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .search-box input::placeholder {
@@ -195,6 +230,8 @@
       color: #2c3e50;
       cursor: pointer;
       font-family: inherit;
+      position: relative;
+      z-index: 2;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237f8c8d' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right clamp(10px, 1vw, 14px) center;
@@ -205,6 +242,7 @@
     .filter-select:hover,
     .filter-select:focus {
       box-shadow: 0 10px 36px rgba(0, 0, 0, 0.15);
+      z-index: 10;
     }
 
     .filter-select option {
@@ -304,22 +342,39 @@
     }
 
     /* ========== Leaflet 弹窗样式 ========== */
+    .leaflet-popup {
+      margin-bottom: 12px;
+    }
+
     .leaflet-popup-content-wrapper {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.97);
       backdrop-filter: blur(10px);
       border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      max-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .leaflet-popup-content {
-      margin: 14px 16px;
+      margin: 14px 16px !important;
       font-family: inherit;
-      max-height: 60vh;
+      max-height: none !important;
       overflow-y: auto;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .leaflet-popup-tip-container {
+      margin: 0 auto;
     }
 
     .popup-title {
-      font-size: 16px;
+      font-size: clamp(14px, 2.2vw, 16px);
       font-weight: 700;
       color: #1a2a3a;
       margin-bottom: 10px;
@@ -328,7 +383,7 @@
 
     .popup-row {
       display: flex;
-      font-size: 13px;
+      font-size: clamp(12px, 1.8vw, 13px);
       margin-bottom: 5px;
       color: #5a6c7d;
       line-height: 1.5;
@@ -336,7 +391,7 @@
 
     .popup-label {
       flex-shrink: 0;
-      width: 72px;
+      width: clamp(58px, 12vw, 72px);
       color: #95a5a6;
     }
 
@@ -350,7 +405,7 @@
       display: inline-block;
       padding: 2px 8px;
       border-radius: 10px;
-      font-size: 11px;
+      font-size: clamp(10px, 1.5vw, 11px);
       font-weight: 600;
       color: #fff;
     }
@@ -361,7 +416,7 @@
       background: rgba(52, 152, 219, 0.08);
       border-left: 3px solid #3498db;
       border-radius: 6px;
-      font-size: 12.5px;
+      font-size: clamp(11.5px, 1.7vw, 12.5px);
       color: #2c3e50;
       line-height: 1.6;
       word-break: break-word;
@@ -370,7 +425,7 @@
 
     .popup-section-title {
       margin: 12px 0 6px;
-      font-size: 13px;
+      font-size: clamp(12px, 1.8vw, 13px);
       font-weight: 700;
       color: #1a2a3a;
       display: flex;
@@ -408,7 +463,7 @@
     .history-item {
       position: relative;
       padding: 6px 0 10px 14px;
-      font-size: 12.5px;
+      font-size: clamp(11.5px, 1.7vw, 12.5px);
       line-height: 1.5;
     }
 
@@ -439,7 +494,7 @@
       border-radius: 50%;
       background: linear-gradient(135deg, #ff6b35, #f7931e);
       color: #fff;
-      font-size: 10px;
+      font-size: clamp(9px, 1.3vw, 10px);
       font-weight: 700;
       margin-right: 6px;
       flex-shrink: 0;
@@ -453,13 +508,13 @@
 
     .history-address {
       color: #5a6c7d;
-      font-size: 12px;
+      font-size: clamp(11px, 1.6vw, 12px);
       margin-bottom: 2px;
     }
 
     .history-period {
       color: #95a5a6;
-      font-size: 11px;
+      font-size: clamp(10px, 1.4vw, 11px);
     }
 
     .history-photo {
@@ -468,7 +523,7 @@
 
     .history-photo a {
       color: #3498db;
-      font-size: 11.5px;
+      font-size: clamp(11px, 1.5vw, 11.5px);
       text-decoration: none;
     }
 
@@ -479,7 +534,7 @@
     .popup-photo-link {
       display: inline-block;
       margin-top: 8px;
-      font-size: 12.5px;
+      font-size: clamp(11.5px, 1.7vw, 12.5px);
       color: #3498db;
       text-decoration: none;
       font-weight: 500;
@@ -636,33 +691,13 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
+      .leaflet-popup-content-wrapper {
+        max-height: 70vh;
+      }
+
       .leaflet-popup-content {
-        margin: 10px 12px;
-        max-height: 65vh;
-      }
-
-      .popup-title {
-        font-size: 14px;
-      }
-
-      .popup-row {
-        font-size: 12px;
-      }
-
-      .popup-label {
-        width: 60px;
-      }
-
-      .popup-status-text {
-        font-size: 11.5px;
-      }
-
-      .history-item {
-        font-size: 11.5px;
-      }
-
-      .history-address {
-        font-size: 11px;
+        margin: 10px 12px !important;
+        max-height: none !important;
       }
     }
 
@@ -731,6 +766,16 @@
 
     .toggle-panel-btn:active {
       transform: scale(0.94);
+    }
+
+    #topControls.collapsed .toggle-panel-btn svg {
+      transform: rotate(90deg);
+      transition: transform 0.3s ease;
+    }
+
+    #topControls.collapsed .info-panel-wrap,
+    #topControls.collapsed .center-wrap {
+      display: none;
     }
 
     /* ========== 桌面端（>768px） ========== */
@@ -818,7 +863,7 @@
       }
 
       .filter-select {
-        width: clamp(90px, 28vw, 130px);
+        width: clamp(80px, 22vw, 110px);
         flex-shrink: 0;
       }
 
@@ -842,10 +887,11 @@
       }
     }
 
-    /* 极窄屏幕 */
-    @media (max-width: 380px) {
+    /* 窄屏幕 */
+    @media (max-width: 680px) {
       #topControls .center-wrap {
         flex-direction: column;
+        gap: clamp(6px, 1.5vw, 10px);
       }
 
       .search-wrap {
@@ -885,12 +931,27 @@
         >
           ✏️ 投稿新门店
         </a>
+        <a
+          class="repo-btn"
+          href="https://github.com/XiaoZhang-qd/mcd-restaurants-history-greater-china"
+          target="_blank"
+          rel="noopener"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.385.6.111.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 17.07 3.633 16.7 3.633 16.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          项目仓库
+        </a>
       </div>
     </div>
 
     <!-- 折叠/展开按钮 (移动端显示) -->
-    <button class="toggle-panel-btn" id="togglePanelBtn" aria-label="展开/收起面板" title="展开/收起面板">
-      ⋯
+    <button class="toggle-panel-btn" id="togglePanelBtn" aria-label="展开/收起控件" title="展开/收起控件">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
     </button>
 
     <!-- 搜索框 + 筛选下拉 -->
@@ -1019,9 +1080,19 @@
 
     function getPopupMaxWidth() {
       var w = window.innerWidth;
-      if (w <= 480) return Math.min(Math.floor(w * 0.92), 380);
-      if (w <= 768) return Math.min(Math.floor(w * 0.80), 440);
-      return 340;
+      var h = window.innerHeight;
+      var maxW, maxH;
+      if (w <= 480) {
+        maxW = Math.min(w * 0.88, 320);
+        maxH = h * 0.70;
+      } else if (w <= 768) {
+        maxW = Math.min(w * 0.85, 360);
+        maxH = h * 0.75;
+      } else {
+        maxW = Math.min(w * 0.55, 380);
+        maxH = h * 0.75;
+      }
+      return { maxWidth: Math.floor(maxW), maxHeight: Math.floor(maxH) };
     }
 
     /* ==================== 状态颜色映射 ==================== */
@@ -1537,8 +1608,13 @@
             fillOpacity: 0.75
           });
 
+          var popupDims = getPopupMaxWidth();
+          var isMobile = window.innerWidth <= 480;
           marker.bindPopup(buildPopupContent(feature), {
-            maxWidth: getPopupMaxWidth(),
+            maxWidth: popupDims.maxWidth,
+            maxHeight: popupDims.maxHeight,
+            autoPan: true,
+            autoPanPadding: isMobile ? [30, 30] : [50, 50],
             className: 'custom-popup'
           });
 
@@ -1726,15 +1802,27 @@
           });
           if (target) {
             const latlng = target.layer.getLatLng();
-            map.flyTo(latlng, 15, { duration: 0.6 });
+            map.flyTo(latlng, 15, { duration: 0.7 });
             setTimeout(function () {
+              var popup = target.layer.getPopup();
+              if (popup) {
+                var dims = getPopupMaxWidth();
+                popup.setMaxWidth(dims.maxWidth);
+              }
               target.layer.openPopup();
-            }, 650);
+              setTimeout(function () {
+                if (map._popup) {
+                  map._popup.update();
+                  var isSmall = window.innerWidth <= 480;
+                  map._popup.panIntoView({
+                    animate: true,
+                    padding: isSmall ? [16, 16] : [30, 30]
+                  });
+                }
+              }, 350);
+            }, 700);
           }
           searchResults.classList.remove('active');
-          searchInput.value = '';
-          currentSearch = '';
-          applyFilter();
         });
       });
     }
@@ -1761,20 +1849,15 @@
     });
 
     document.addEventListener('click', function (e) {
-      if (!searchResults.contains(e.target) && e.target !== searchInput) {
+      if (!searchResults.contains(e.target) && e.target !== searchInput && !e.target.closest('.search-result-item')) {
         searchResults.classList.remove('active');
       }
     });
 
-    searchInput.addEventListener('blur', function () {
-      setTimeout(function () {
-        searchResults.classList.remove('active');
-      }, 200);
-    });
-
     searchInput.addEventListener('focus', function () {
-      if (searchResults.children.length > 0) {
+      if (searchInput.value.trim().length > 0) {
         searchResults.classList.add('active');
+        renderSearchResults(searchInput.value);
       }
     });
 
@@ -1804,13 +1887,37 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         applyMobileState();
-        var popupEl = document.querySelector('.leaflet-popup-content-wrapper');
+        if (!isMobile()) {
+          topControls.classList.remove('collapsed');
+          userCollapsed = false;
+        }
+        var dims = getPopupMaxWidth();
+        var popupEl = document.querySelector('.leaflet-popup');
         if (popupEl) {
-          popupEl.style.maxWidth = getPopupMaxWidth() + 'px';
-          var popup = map._popup;
-          if (popup) popup.update();
+          popupEl.style.maxWidth = dims.maxWidth + 'px';
+        }
+        var popup = map._popup;
+        if (popup) {
+          popup.setMaxWidth(dims.maxWidth);
+          popup.update();
+          popup.panIntoView({ animate: true, padding: [20, 20] });
         }
       }, 150);
+    });
+
+    /* ==================== 弹窗打开时自动 panIntoView ==================== */
+    map.on('popupopen', function (e) {
+      var popup = e.popup;
+      var dims = getPopupMaxWidth();
+      popup.setMaxWidth(dims.maxWidth);
+      popup.update();
+      var isSmall = window.innerWidth <= 480;
+      setTimeout(function () {
+        popup.panIntoView({
+          animate: true,
+          padding: isSmall ? [16, 16] : [30, 30]
+        });
+      }, 30);
     });
 
     applyMobileState();

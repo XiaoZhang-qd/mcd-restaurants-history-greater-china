@@ -776,6 +776,51 @@
         ],
         "photo_urls": []
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.2550,
+          23.1247
+        ]
+      },
+      "properties": {
+        "name": "麦当劳 广州人民中路店",
+        "region": "中国‑广东省",
+        "city": "广州",
+        "address": "广州市越秀区人民中路304‑314号首层及二层（广州市儿童医院旁）",
+        "open_year": "1994‑10‑07",
+        "close_year": "营业中",
+        "status_key": "still_open_original",
+        "status": "原址仍在持续营业中，内部保留着大量90年代原餐厅店内装修；门店紧邻越秀区儿童医院，是不少老广州人和在广州生活的童年在儿童医院看病过后就餐的记忆地点；工商登记注册日期1994‑10‑07，实际对外开业日期待考据",
+        "locations": [
+          {
+            "seq": 1,
+            "label": "原址",
+            "address": "广州市越秀区人民中路304‑314号首层及二层（广州市儿童医院旁）",
+            "open_year": "1994‑10‑07",
+            "close_year": "营业中",
+            "coordinates": [
+              113.2550,
+              23.1247
+            ],
+            "photo_urls": [
+              "https://www.openrice.com.cn/zh/guangzhou/r-%E9%BA%A5%E7%95%B6%E5%8B%9E-%E6%B5%B7%E7%8F%A0%E5%BB%A3%E5%A0%B4-%E8%A5%BF%E5%BC%8F-r7970597",
+              "https://ak-d.tripcdn.com/images/100k0k000000clvh59BDF_D_750_520_Q90.jpg?proc=autoorient",
+              "https://hk.trip.com/restaurant/china/guangzhou/detail/mcdonalds-renminzhonglu-11477882",
+              "https://cdn1.orstatic.com.cn/userphoto2/photo/9/7EJ/01GNCKF568A5442026BD6Elv.jpg"
+            ]
+          }
+        ],
+        "photo_urls": [
+          "https://www.openrice.com.cn/zh/guangzhou/r-%E9%BA%A5%E7%95%B6%E5%8B%9E-%E6%B5%B7%E7%8F%A0%E5%BB%A3%E5%A0%B4-%E8%A5%BF%E5%BC%8F-r7970597",
+          "https://ak-d.tripcdn.com/images/100k0k000000clvh59BDF_D_750_520_Q90.jpg?proc=autoorient",
+          "https://hk.trip.com/restaurant/china/guangzhou/detail/mcdonalds-renminzhonglu-11477882",
+          "https://cdn1.orstatic.com.cn/userphoto2/photo/9/7EJ/01GNCKF568A5442026BD6Elv.jpg"
+        ]
+      }
     }
   ]
 }
