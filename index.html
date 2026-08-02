@@ -19,7 +19,7 @@
   ></script>
 
   <style>
-    /* ========== 全局基础样式 ========== */
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
@@ -30,14 +30,14 @@
       background: #eef2f5;
     }
 
-    /* ========== 地图容器 ========== */
+
     #map {
       position: absolute;
       inset: 0;
       z-index: 1;
     }
 
-    /* ========== 通用毛玻璃卡片 ========== */
+
     .glass-panel {
       background: rgba(255, 255, 255, 0.72);
       backdrop-filter: blur(14px) saturate(1.4);
@@ -47,7 +47,7 @@
       border: 1px solid rgba(255, 255, 255, 0.55);
     }
 
-    /* ========== 左侧信息面板 ========== */
+
     .info-panel {
       padding: clamp(10px, 1.4vw, 18px) clamp(12px, 1.6vw, 20px);
     }
@@ -117,7 +117,7 @@
       background: rgba(36, 41, 47, 0.12);
     }
 
-    /* ========== 搜索框容器 ========== */
+
     .search-wrap {
       flex: 1;
       max-width: clamp(160px, 22vw, 300px);
@@ -167,7 +167,7 @@
       color: #95a5a6;
     }
 
-    /* 搜索结果下拉列表 */
+
     .search-results {
       display: none;
       position: absolute;
@@ -211,7 +211,7 @@
       color: #95a5a6;
     }
 
-    /* ========== 筛选下拉框 ========== */
+
     .filter-select {
       appearance: none;
       -webkit-appearance: none;
@@ -250,7 +250,7 @@
       color: #2c3e50;
     }
 
-    /* ========== 底图切换下拉框 ========== */
+
     .basemap-select {
       appearance: none;
       -webkit-appearance: none;
@@ -286,14 +286,14 @@
       color: #2c3e50;
     }
 
-    /* 底图切换容器 */
+
     .basemap-wrap {
       position: absolute;
       z-index: 1000;
       transition: all 0.3s ease;
     }
 
-    /* ========== 图例面板 ========== */
+
     .legend-panel {
       position: absolute;
       z-index: 1000;
@@ -341,7 +341,7 @@
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
-    /* ========== Leaflet 弹窗样式 ========== */
+
     .leaflet-popup {
       margin-bottom: 12px;
     }
@@ -442,7 +442,7 @@
       border-radius: 2px;
     }
 
-    /* 历史时间线 */
+
     .history-timeline {
       position: relative;
       padding-left: 16px;
@@ -544,7 +544,7 @@
       text-decoration: underline;
     }
 
-    /* ========== 照片画廊 ========== */
+
     .photo-gallery {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -589,7 +589,7 @@
       font-weight: 600;
     }
 
-    /* 灯箱 */
+
     .lightbox {
       position: fixed;
       inset: 0;
@@ -701,7 +701,7 @@
       }
     }
 
-    /* ========== 加载提示 ========== */
+
     .loading-tip {
       position: absolute;
       top: 50%;
@@ -714,7 +714,7 @@
       display: none;
     }
 
-    /* ========== 顶栏控件容器 ========== */
+
     #topControls {
       position: absolute;
       z-index: 1000;
@@ -742,7 +742,7 @@
       min-width: 0;
     }
 
-    /* 折叠/展开按钮 */
+
     .toggle-panel-btn {
       display: none;
       align-items: center;
@@ -807,7 +807,7 @@
         flex-wrap: wrap;
       }
 
-      /* 信息面板默认折叠，与切换按钮同一行 */
+
       #topControls .info-panel-wrap {
         flex: 1;
         min-width: 0;
@@ -827,13 +827,13 @@
         text-overflow: ellipsis;
       }
 
-      /* 折叠态隐藏 */
+
       #topControls .info-panel-wrap .info-panel p,
       #topControls .info-panel-wrap .info-panel .submit-btn {
         display: none;
       }
 
-      /* 展开态 */
+
       #topControls:not(.collapsed) .info-panel-wrap {
         max-height: clamp(180px, 35vh, 280px);
         overflow-y: auto;
@@ -851,7 +851,7 @@
         display: inline-flex;
       }
 
-      /* 中间控制区独占一行 */
+
       #topControls .center-wrap {
         width: 100%;
         gap: clamp(6px, 1.5vw, 12px);
@@ -871,14 +871,14 @@
         display: inline-flex;
       }
 
-      /* 底图选择器固定在右下角 */
+
       .basemap-wrap {
         top: auto;
         bottom: clamp(48px, 7vh, 80px);
         right: clamp(8px, 1.5vw, 14px);
       }
 
-      /* 图例 */
+
       .legend-panel {
         bottom: clamp(8px, 1.2vh, 14px);
         left: clamp(8px, 1.5vw, 14px);
@@ -887,7 +887,7 @@
       }
     }
 
-    /* 窄屏幕 */
+
     @media (max-width: 680px) {
       #topControls .center-wrap {
         flex-direction: column;
@@ -1110,13 +1110,52 @@
       building_gone:       '建筑拆除'
     };
 
+    /* ==================== 地图状态持久化 ==================== */
+    const MAP_STATE_KEY = 'mcd_map_state_v1';
+    let savedMapState = null;
+    try {
+      var raw = localStorage.getItem(MAP_STATE_KEY);
+      if (raw) savedMapState = JSON.parse(raw);
+    } catch (e) { savedMapState = null; }
+
+    function saveMapState() {
+      try {
+        var center = map.getCenter();
+        var lat = center.lat;
+        var lng = center.lng;
+        var curCrs = BASAMAP_CRS[currentBasemapKey] || 'wgs84';
+        if (curCrs === 'gcj02') {
+          var wgs = gcj02ToWgs84(lng, lat);
+          lat = wgs[1];
+          lng = wgs[0];
+        }
+        var state = {
+          lat: lat,
+          lng: lng,
+          zoom: map.getZoom(),
+          basemap: currentBasemapKey || 'osm'
+        };
+        localStorage.setItem(MAP_STATE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    var initCenter = [25.5, 118];
+    var initZoom = 4.2;
+    if (savedMapState && typeof savedMapState.lat === 'number' && typeof savedMapState.lng === 'number') {
+      initCenter = [savedMapState.lat, savedMapState.lng];
+      if (typeof savedMapState.zoom === 'number') initZoom = savedMapState.zoom;
+    }
+
     /* ==================== 初始化地图 ==================== */
     const map = L.map('map', {
-      center: [25.5, 118],
-      zoom: 4.2,
+      center: initCenter,
+      zoom: initZoom,
       zoomControl: false,
       scrollWheelZoom: true
     });
+
+    map.on('moveend', saveMapState);
+    map.on('zoomend', saveMapState);
 
     /* 自定义缩放控件 — 直接插到地图容器，绕过 Leaflet 控制容器 */
     (function addCustomZoom() {
@@ -1200,7 +1239,26 @@
     let currentBasemap = osmLayer;
     let currentBasemapKey = 'osm';
     const basemapSelect = document.getElementById('basemapSelect');
-    
+
+    if (savedMapState && savedMapState.basemap && savedMapState.basemap !== 'osm') {
+      var savedBasemap = savedMapState.basemap;
+      var savedTargetCrs = BASAMAP_CRS[savedBasemap] || 'wgs84';
+      let savedLayer = osmLayer;
+      if (savedBasemap === 'gaode') savedLayer = gaodeLayer;
+      else if (savedBasemap === 'stamen') savedLayer = stamenLayer;
+      else if (savedBasemap === 'satellite') savedLayer = satelliteLayer;
+      osmLayer.remove();
+      savedLayer.addTo(map);
+      currentBasemap = savedLayer;
+      currentBasemapKey = savedBasemap;
+      basemapSelect.value = savedBasemap;
+
+      if (savedTargetCrs === 'gcj02' && savedMapState) {
+        var gcj = wgs84ToGcj02(savedMapState.lng, savedMapState.lat);
+        map.setView([gcj[1], gcj[0]], savedMapState.zoom || 4.2, { animate: false });
+      }
+    }
+
     basemapSelect.addEventListener('change', function (e) {
       const value = e.target.value;
       const targetCrs = BASAMAP_CRS[value] || 'wgs84';
@@ -1209,7 +1267,6 @@
       const currentCenter = map.getCenter();
       const savedZoom = map.getZoom();
 
-      // 将当前中心点转为 WGS-84 统一存储
       var centerWgs84;
       if (currentCrs === 'gcj02') {
         var rev = gcj02ToWgs84(currentCenter.lng, currentCenter.lat);
@@ -1245,6 +1302,8 @@
         });
         map.setView(centerWgs84, savedZoom, { animate: false });
       }
+
+      saveMapState();
     });
 
     /* ==================== 数据管理 ==================== */
@@ -1668,7 +1727,27 @@
         function finalizeLoading() {
           if (allStores.length > 0) {
             var group = L.featureGroup(allStores.map(function (s) { return s.layer; }));
-            map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 12 });
+            var crs = BASAMAP_CRS[currentBasemapKey] || 'wgs84';
+
+            if (crs === 'gcj02') {
+              allStores.forEach(function (store) {
+                var latlng = store.wgs84Latlng;
+                if (!latlng) return;
+                var gcj = wgs84ToGcj02(latlng[1], latlng[0]);
+                store.layer.setLatLng([gcj[1], gcj[0]]);
+              });
+            }
+
+            if (savedMapState && typeof savedMapState.lat === 'number') {
+              if (crs === 'gcj02') {
+                var gcj2 = wgs84ToGcj02(savedMapState.lng, savedMapState.lat);
+                map.setView([gcj2[1], gcj2[0]], savedMapState.zoom || 4.2, { animate: false });
+              } else {
+                map.setView([savedMapState.lat, savedMapState.lng], savedMapState.zoom || 4.2, { animate: false });
+              }
+            } else {
+              map.fitBounds(group.getBounds(), { padding: [40, 40], maxZoom: 12 });
+            }
           }
           loadingTip.style.display = 'none';
           console.log('✅ 加载完成 ' + allStores.length + ' 条门店数据');

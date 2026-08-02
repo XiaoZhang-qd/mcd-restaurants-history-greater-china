@@ -5,10 +5,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          113.281870,
-          23.138220
-        ]
+        "coordinates": [113.276875, 23.141128]
       },
       "properties": {
         "name": "广州第一家麦当劳（63层广东国际大厦首层）",
@@ -26,10 +23,7 @@
             "address": "广州市越秀区环市东路 63 层广东国际大厦首层",
             "open_year": "1993‑02‑20",
             "close_year": "2010‑03‑31",
-            "coordinates": [
-              113.2644,
-              23.1291
-            ],
+            "coordinates": [113.276875, 23.141128],
             "photo_urls": [
               "https://th.bing.com/th/id/R.62a88479189fdd49ce7ad80fa274e136?rik=fIYPdCREyIiQUA&riu=http%3a%2f%2fe0.ifengimg.com%2f01%2f2019%2f0521%2f479DC34438C2F8AE26A6C95E43BCFFAAF8B105D7_size58_w690_h470.jpeg&ehk=cbt8tQ0RtyvmjNF8FHX9onEcx1kOYRe7sLVAun7zYRQ%3d&risl=&pid=ImgRaw&r=0",
               "https://n.sinaimg.cn/translate/175/w1063h712/20191002/c9c8-ifmectk5863334.jpg"
@@ -55,10 +49,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          114.118012,
-          22.545809
-        ]
+        "coordinates": [114.118012, 22.545809]
       },
       "properties": {
         "name": "麦当劳 深圳光华店（中国内地首家麦当劳）",
@@ -76,10 +67,7 @@
             "address": "深圳市罗湖区解放路2046号西华宫光华楼2层",
             "open_year": "1990‑10‑08",
             "close_year": "营业中",
-            "coordinates": [
-              114.118012,
-              22.545809
-            ],
+            "coordinates": [114.118012, 22.545809],
             "photo_urls": [
               "https://tse4.mm.bing.net/th/id/OIP.mZrOEBGmTh1StCzivcYEegHaE9?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
               "https://static.foodtalks.cn/image/post/58b013abe6d94d6e8042f8eea2a220d5.png"
@@ -95,10 +83,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          121.4737,
-          31.2304
-        ]
+        "coordinates": [121.4737, 31.2304]
       },
       "properties": {
         "name": "麦当劳 上海南京西路店",
@@ -116,10 +101,7 @@
             "address": "上海市静安区南京西路（原址一层）",
             "open_year": "1994‑07‑22",
             "close_year": "2023‑05‑15",
-            "coordinates": [
-              121.4737,
-              31.2304
-            ],
+            "coordinates": [121.4737, 31.2304],
             "photo_urls": []
           },
           {
@@ -138,10 +120,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          116.4105,
-          39.9049
-        ]
+        "coordinates": [116.4105, 39.9049]
       },
       "properties": {
         "name": "麦当劳 北京王府井店",
@@ -159,10 +138,7 @@
             "address": "北京市东城区王府井大街原址",
             "open_year": "1992‑04‑23",
             "close_year": "2022‑11‑30",
-            "coordinates": [
-              116.4105,
-              39.9049
-            ],
+            "coordinates": [116.4105, 39.9049],
             "photo_urls": []
           },
           {
@@ -181,10 +157,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          114.161,
-          22.2775
-        ]
+        "coordinates": [114.161, 22.2775]
       },
       "properties": {
         "name": "麦当劳 香港中环老店",
@@ -202,10 +175,7 @@
             "address": "香港中环原址",
             "open_year": "1976‑03‑12",
             "close_year": "2021‑03‑31",
-            "coordinates": [
-              114.161,
-              22.2775
-            ],
+            "coordinates": [114.161, 22.2775],
             "photo_urls": []
           }
         ],
@@ -216,10 +186,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          121.5654,
-          25.033
-        ]
+        "coordinates": [121.5654, 25.033]
       },
       "properties": {
         "name": "麦当劳 台北西门町店",
@@ -237,10 +204,7 @@
             "address": "台北市万华区西门町原址",
             "open_year": "1988‑06‑10",
             "close_year": "2020‑08‑15",
-            "coordinates": [
-              121.5654,
-              25.033
-            ],
+            "coordinates": [121.5654, 25.033],
             "photo_urls": []
           }
         ],
@@ -251,10 +215,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          113.5492,
-          22.1987
-        ]
+        "coordinates": [113.5492, 22.1987]
       },
       "properties": {
         "name": "麦当劳 澳门议事亭前地店",
@@ -272,10 +233,7 @@
             "address": "澳门议事亭前地",
             "open_year": "1987‑11‑20",
             "close_year": "营业中",
-            "coordinates": [
-              113.5492,
-              22.1987
-            ],
+            "coordinates": [113.5492, 22.1987],
             "photo_urls": []
           }
         ],
@@ -286,10 +244,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          114.190765,
-          22.276847
-        ]
+        "coordinates": [114.190765, 22.276847]
       },
       "properties": {
         "name": "麦当劳 香港铜锣湾怡和街老店",
@@ -307,10 +262,7 @@
             "address": "香港铜锣湾怡和街46-54号底层",
             "open_year": "1977‑08‑05",
             "close_year": "2019‑02‑28",
-            "coordinates": [
-              114.190765,
-              22.276847
-            ],
+            "coordinates": [114.190765, 22.276847],
             "photo_urls": []
           },
           {
@@ -329,10 +281,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          121.4693,
-          31.2397
-        ]
+        "coordinates": [121.4693, 31.2397]
       },
       "properties": {
         "name": "麦当劳 上海陆家嘴店",
@@ -350,10 +299,7 @@
             "address": "上海市浦东新区陆家嘴",
             "open_year": "1999‑12‑18",
             "close_year": "营业中",
-            "coordinates": [
-              121.4693,
-              31.2397
-            ],
+            "coordinates": [121.4693, 31.2397],
             "photo_urls": []
           }
         ],
@@ -364,10 +310,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          113.324,
-          23.1326
-        ]
+        "coordinates": [113.315856, 23.134969]
       },
       "properties": {
         "name": "麦当劳 广州天河城店",
@@ -385,10 +328,7 @@
             "address": "广州市天河区天河路208号天河城",
             "open_year": "1996‑09‑30",
             "close_year": "2022‑06‑15",
-            "coordinates": [
-              113.324,
-              23.1326
-            ],
+            "coordinates": [113.324, 23.1326],
             "photo_urls": []
           },
           {
@@ -407,10 +347,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          114.0859,
-          22.5475
-        ]
+        "coordinates": [114.0859, 22.5475]
       },
       "properties": {
         "name": "麦当劳 深圳华强北店",
@@ -428,10 +365,7 @@
             "address": "深圳市福田区华强北原址",
             "open_year": "1995‑03‑15",
             "close_year": "2023‑01‑10",
-            "coordinates": [
-              114.0859,
-              22.5475
-            ],
+            "coordinates": [114.0859, 22.5475],
             "photo_urls": []
           }
         ],
@@ -442,10 +376,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          120.1551,
-          30.2741
-        ]
+        "coordinates": [120.1551, 30.2741]
       },
       "properties": {
         "name": "麦当劳 杭州西湖店",
@@ -463,10 +394,7 @@
             "address": "杭州市西湖区西湖畔",
             "open_year": "2000‑05‑20",
             "close_year": "营业中",
-            "coordinates": [
-              120.1551,
-              30.2741
-            ],
+            "coordinates": [120.1551, 30.2741],
             "photo_urls": []
           }
         ],
@@ -477,10 +405,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          120.6197,
-          31.299
-        ]
+        "coordinates": [120.6197, 31.299]
       },
       "properties": {
         "name": "麦当劳 苏州观前街店",
@@ -498,10 +423,7 @@
             "address": "苏州市姑苏区观前街原址",
             "open_year": "2001‑08‑08",
             "close_year": "2023‑04‑30",
-            "coordinates": [
-              120.6197,
-              31.299
-            ],
+            "coordinates": [120.6197, 31.299],
             "photo_urls": []
           },
           {
@@ -520,10 +442,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          120.3826,
-          36.0671
-        ]
+        "coordinates": [120.3826, 36.0671]
       },
       "properties": {
         "name": "麦当劳 青岛中山路店",
@@ -541,10 +460,7 @@
             "address": "青岛市市南区中山路",
             "open_year": "2002‑10‑01",
             "close_year": "营业中",
-            "coordinates": [
-              120.3826,
-              36.0671
-            ],
+            "coordinates": [120.3826, 36.0671],
             "photo_urls": []
           }
         ],
@@ -555,10 +471,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          108.9402,
-          34.3416
-        ]
+        "coordinates": [108.9402, 34.3416]
       },
       "properties": {
         "name": "麦当劳 西安钟楼店",
@@ -576,10 +489,7 @@
             "address": "西安市碑林区钟楼商圈原址",
             "open_year": "2003‑06‑18",
             "close_year": "2022‑10‑20",
-            "coordinates": [
-              108.9402,
-              34.3416
-            ],
+            "coordinates": [108.9402, 34.3416],
             "photo_urls": []
           },
           {
@@ -598,10 +508,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          104.0665,
-          30.5728
-        ]
+        "coordinates": [104.0665, 30.5728]
       },
       "properties": {
         "name": "麦当劳 成都春熙路店",
@@ -619,10 +526,7 @@
             "address": "成都市锦江区春熙路",
             "open_year": "2004‑12‑24",
             "close_year": "营业中",
-            "coordinates": [
-              104.0665,
-              30.5728
-            ],
+            "coordinates": [104.0665, 30.5728],
             "photo_urls": []
           }
         ],
@@ -633,10 +537,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          113.8244,
-          22.6969
-        ]
+        "coordinates": [113.8244, 22.6969]
       },
       "properties": {
         "name": "麦当劳 东莞虎门店",
@@ -654,10 +555,7 @@
             "address": "东莞市虎门镇原址",
             "open_year": "2005‑04‑16",
             "close_year": "2023‑08‑12",
-            "coordinates": [
-              113.8244,
-              22.6969
-            ],
+            "coordinates": [113.8244, 22.6969],
             "photo_urls": []
           }
         ],
@@ -668,10 +566,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          118.7969,
-          32.0603
-        ]
+        "coordinates": [118.7969, 32.0603]
       },
       "properties": {
         "name": "麦当劳 南京新街口店",
@@ -689,10 +584,7 @@
             "address": "南京市玄武区新街口原址",
             "open_year": "1998‑11‑28",
             "close_year": "2023‑02‑28",
-            "coordinates": [
-              118.7969,
-              32.0603
-            ],
+            "coordinates": [118.7969, 32.0603],
             "photo_urls": []
           },
           {
@@ -711,10 +603,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          121.509,
-          25.0376
-        ]
+        "coordinates": [121.509, 25.0376]
       },
       "properties": {
         "name": "麦当劳 台北台北车站店",
@@ -732,10 +621,7 @@
             "address": "台北市中正区台北车站",
             "open_year": "1989‑07‑14",
             "close_year": "营业中",
-            "coordinates": [
-              121.509,
-              25.0376
-            ],
+            "coordinates": [121.509, 25.0376],
             "photo_urls": []
           }
         ],
@@ -746,10 +632,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          114.2319,
-          22.3119
-        ]
+        "coordinates": [114.2319, 22.3119]
       },
       "properties": {
         "name": "麦当劳 香港旺角波鞋街店",
@@ -767,10 +650,7 @@
             "address": "香港旺角波鞋街原址",
             "open_year": "1978‑05‑12",
             "close_year": "2020‑12‑31",
-            "coordinates": [
-              114.2319,
-              22.3119
-            ],
+            "coordinates": [114.2319, 22.3119],
             "photo_urls": []
           }
         ],
@@ -781,10 +661,7 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          113.2550,
-          23.1247
-        ]
+        "coordinates": [113.247758, 23.122333]
       },
       "properties": {
         "name": "麦当劳 广州人民中路店",
@@ -802,10 +679,7 @@
             "address": "广州市越秀区人民中路304‑314号首层及二层（广州市儿童医院旁）",
             "open_year": "1994‑10‑07",
             "close_year": "营业中",
-            "coordinates": [
-              113.2550,
-              23.1247
-            ],
+            "coordinates": [113.247758, 23.122333],
             "photo_urls": [
               "https://www.openrice.com.cn/zh/guangzhou/r-%E9%BA%A5%E7%95%B6%E5%8B%9E-%E6%B5%B7%E7%8F%A0%E5%BB%A3%E5%A0%B4-%E8%A5%BF%E5%BC%8F-r7970597",
               "https://ak-d.tripcdn.com/images/100k0k000000clvh59BDF_D_750_520_Q90.jpg?proc=autoorient",
