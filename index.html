@@ -298,7 +298,8 @@
       position: absolute;
       z-index: 1000;
       padding: clamp(8px, 1vw, 14px) clamp(10px, 1.2vw, 16px);
-      width: clamp(130px, 15vw, 180px);
+      min-width: clamp(140px, 16vw, 200px);
+      max-width: clamp(200px, 22vw, 280px);
     }
 
     .legend-panel h3 {
@@ -307,25 +308,19 @@
       margin-bottom: clamp(4px, 0.5vw, 10px);
       color: #1a2a3a;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .legend-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: clamp(3px, 0.4vw, 7px);
       font-size: clamp(10px, 1.1vw, 12px);
       color: #5a6c7d;
-      line-height: 1.3;
-      flex-wrap: nowrap;
-      overflow: hidden;
+      line-height: 1.4;
     }
 
     .legend-item span:last-child {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      flex: 1;
       min-width: 0;
     }
 
@@ -337,6 +332,7 @@
       height: clamp(8px, 0.9vw, 12px);
       border-radius: 50%;
       margin-right: clamp(6px, 0.7vw, 10px);
+      margin-top: clamp(2px, 0.2vw, 3px);
       flex-shrink: 0;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
@@ -613,6 +609,65 @@
       border-radius: 8px;
       box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
       animation: zoomIn 0.2s ease;
+      cursor: zoom-in;
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .lightbox img.zoomed {
+      cursor: grab;
+      transition: none;
+    }
+
+    .lightbox img.dragging {
+      cursor: grabbing;
+      transition: none;
+    }
+
+    .lightbox-zoom-controls {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 24px;
+      padding: 6px 10px;
+      backdrop-filter: blur(6px);
+    }
+
+    .lightbox-zoom-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+
+    .lightbox-zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-zoom-level {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 42px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
     }
 
     .lightbox-close {
@@ -784,6 +839,10 @@
         top: clamp(10px, 1.2vh, 16px);
         left: clamp(10px, 1.2vw, 16px);
         right: clamp(140px, 15vw, 200px);
+      }
+
+      .toggle-panel-btn {
+        display: inline-flex;
       }
 
       .basemap-wrap {
@@ -992,19 +1051,19 @@
     <h3>图例说明</h3>
     <div class="legend-item">
       <span class="legend-dot" style="background:#2ecc71;"></span>
-      <span>原址营业（仍在原地址）</span>
+      <span>原址营业</span><span>（仍在原地址）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#f1c40f;"></span>
-      <span>同楼搬迁（同大楼内移位）</span>
+      <span>同楼搬迁</span><span>（同大楼内移位）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#e67e22;"></span>
-      <span>商号远迁（迁至附近街区）</span>
+      <span>商号远迁</span><span>（迁至附近街区）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#e74c3c;"></span>
-      <span>建筑拆除（原址已不存在）</span>
+      <span>建筑拆除</span><span>（原址已不存在）</span>
     </div>
   </div>
 
@@ -1014,6 +1073,12 @@
     <button class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="上一张">‹</button>
     <button class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="下一张">›</button>
     <img id="lightboxImg" src="" alt="" />
+    <div class="lightbox-zoom-controls" id="lightboxZoomControls">
+      <button class="lightbox-zoom-btn" id="zoomOutBtn" aria-label="缩小">−</button>
+      <span class="lightbox-zoom-level" id="zoomLevel">100%</span>
+      <button class="lightbox-zoom-btn" id="zoomInBtn" aria-label="放大">+</button>
+      <button class="lightbox-zoom-btn" id="zoomResetBtn" aria-label="重置" style="font-size:14px;">⟳</button>
+    </div>
     <div class="lightbox-counter" id="lightboxCounter"></div>
   </div>
 
@@ -1432,12 +1497,54 @@
     var lightboxPrev = document.getElementById('lightboxPrev');
     var lightboxNext = document.getElementById('lightboxNext');
     var lightboxCounter = document.getElementById('lightboxCounter');
+    var zoomInBtn = document.getElementById('zoomInBtn');
+    var zoomOutBtn = document.getElementById('zoomOutBtn');
+    var zoomResetBtn = document.getElementById('zoomResetBtn');
+    var zoomLevelEl = document.getElementById('zoomLevel');
     var currentGallery = [];
     var currentIndex = 0;
+
+    var zoomState = { scale: 1, translateX: 0, translateY: 0 };
+    var MIN_ZOOM = 0.5;
+    var MAX_ZOOM = 5;
+
+    function applyZoom() {
+      lightboxImg.style.transform = 'translate(' + zoomState.translateX + 'px, ' + zoomState.translateY + 'px) scale(' + zoomState.scale + ')';
+      zoomLevelEl.textContent = Math.round(zoomState.scale * 100) + '%';
+      if (zoomState.scale > 1.01 || zoomState.scale < 0.99) {
+        lightboxImg.classList.add('zoomed');
+      } else {
+        lightboxImg.classList.remove('zoomed');
+      }
+    }
+
+    function resetZoom() {
+      zoomState.scale = 1;
+      zoomState.translateX = 0;
+      zoomState.translateY = 0;
+      applyZoom();
+    }
+
+    function setZoom(newScale, cx, cy) {
+      newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+      if (cx !== undefined && cy !== undefined) {
+        var rect = lightboxImg.getBoundingClientRect();
+        var imgCx = rect.left + rect.width / 2;
+        var imgCy = rect.top + rect.height / 2;
+        var s = zoomState.scale;
+        var ix = imgCx + (cx - imgCx - zoomState.translateX) / s;
+        var iy = imgCy + (cy - imgCy - zoomState.translateY) / s;
+        zoomState.translateX = cx - imgCx - newScale * (ix - imgCx);
+        zoomState.translateY = cy - imgCy - newScale * (iy - imgCy);
+      }
+      zoomState.scale = newScale;
+      applyZoom();
+    }
 
     function openLightbox(photos, index) {
       currentGallery = photos;
       currentIndex = index;
+      resetZoom();
       updateLightboxImg();
       lightbox.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -1448,6 +1555,7 @@
       document.body.style.overflow = '';
       currentGallery = [];
       currentIndex = 0;
+      resetZoom();
     }
 
     function updateLightboxImg() {
@@ -1456,6 +1564,7 @@
       lightboxCounter.textContent = (currentIndex + 1) + ' / ' + currentGallery.length;
       lightboxPrev.style.display = currentGallery.length > 1 ? 'flex' : 'none';
       lightboxNext.style.display = currentGallery.length > 1 ? 'flex' : 'none';
+      resetZoom();
     }
 
     function prevPhoto() {
@@ -1470,17 +1579,158 @@
       updateLightboxImg();
     }
 
-    lightboxClose.addEventListener('click', closeLightbox);
-    lightboxPrev.addEventListener('click', prevPhoto);
-    lightboxNext.addEventListener('click', nextPhoto);
-    lightbox.addEventListener('click', function (e) {
-      if (e.target === lightbox) closeLightbox();
+    /* --- 缩放按钮 --- */
+    zoomInBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setZoom(zoomState.scale * 1.2);
     });
+    zoomOutBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      setZoom(zoomState.scale / 1.2);
+    });
+    zoomResetBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      resetZoom();
+    });
+
+    /* --- 滚轮缩放 --- */
+    lightboxImg.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      var delta = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      setZoom(zoomState.scale * delta, e.clientX, e.clientY);
+    }, { passive: false });
+
+    /* --- 双击切换缩放 --- */
+    var lastDblClickTime = 0;
+    lightboxImg.addEventListener('dblclick', function (e) {
+      e.preventDefault();
+      lastDblClickTime = Date.now();
+      if (zoomState.scale > 1.01) {
+        resetZoom();
+      } else {
+        setZoom(2.0, e.clientX, e.clientY);
+      }
+    });
+
+    /* --- 拖拽平移 --- */
+    var isDragging = false;
+    var didDrag = false;
+    var dragStart = null;
+
+    lightboxImg.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      if (zoomState.scale <= 1.01) return;
+      e.preventDefault();
+      isDragging = true;
+      didDrag = false;
+      dragStart = { x: e.clientX - zoomState.translateX, y: e.clientY - zoomState.translateY };
+      lightboxImg.classList.add('dragging');
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!isDragging) return;
+      var newTx = e.clientX - dragStart.x;
+      var newTy = e.clientY - dragStart.y;
+      var moved = Math.abs(newTx - zoomState.translateX) + Math.abs(newTy - zoomState.translateY);
+      if (moved > 3) didDrag = true;
+      zoomState.translateX = newTx;
+      zoomState.translateY = newTy;
+      applyZoom();
+    });
+
+    document.addEventListener('mouseup', function () {
+      if (isDragging) {
+        isDragging = false;
+        lightboxImg.classList.remove('dragging');
+      }
+    });
+
+    /* --- 触摸支持（双指缩放 + 单指拖拽） --- */
+    var touchState = null;
+
+    lightboxImg.addEventListener('touchstart', function (e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        var t0 = e.touches[0], t1 = e.touches[1];
+        var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        touchState = {
+          mode: 'pinch',
+          startDist: dist,
+          startScale: zoomState.scale,
+          startTranslateX: zoomState.translateX,
+          startTranslateY: zoomState.translateY,
+          centerX: (t0.clientX + t1.clientX) / 2,
+          centerY: (t0.clientY + t1.clientY) / 2
+        };
+      } else if (e.touches.length === 1 && zoomState.scale > 1.01) {
+        var t = e.touches[0];
+        touchState = {
+          mode: 'drag',
+          startX: t.clientX,
+          startY: t.clientY,
+          startTranslateX: zoomState.translateX,
+          startTranslateY: zoomState.translateY
+        };
+      }
+    }, { passive: false });
+
+    lightboxImg.addEventListener('touchmove', function (e) {
+      if (!touchState) return;
+      e.preventDefault();
+      if (touchState.mode === 'pinch' && e.touches.length === 2) {
+        var t0 = e.touches[0], t1 = e.touches[1];
+        var dx = t1.clientX - t0.clientX, dy = t1.clientY - t0.clientY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var newScale = touchState.startScale * (dist / touchState.startDist);
+        newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+        zoomState.scale = newScale;
+        zoomState.translateX = touchState.startTranslateX;
+        zoomState.translateY = touchState.startTranslateY;
+        applyZoom();
+      } else if (touchState.mode === 'drag' && e.touches.length === 1) {
+        var t = e.touches[0];
+        zoomState.translateX = touchState.startTranslateX + (t.clientX - touchState.startX);
+        zoomState.translateY = touchState.startTranslateY + (t.clientY - touchState.startY);
+        applyZoom();
+      }
+    }, { passive: false });
+
+    lightboxImg.addEventListener('touchend', function (e) {
+      if (e.touches.length === 0) {
+        if (touchState && touchState.mode === 'pinch' && zoomState.scale < 1.02) {
+          resetZoom();
+        }
+        touchState = null;
+      }
+    });
+
+    /* --- 单击图片：已缩放时重置（但不与拖拽/双击冲突） --- */
+    lightboxImg.addEventListener('click', function (e) {
+      var now = Date.now();
+      if (now - lastDblClickTime < 400) return;
+      if (didDrag) { didDrag = false; return; }
+      if (zoomState.scale > 1.01) {
+        resetZoom();
+      }
+    });
+
+    /* --- 键盘缩放 --- */
     document.addEventListener('keydown', function (e) {
       if (!lightbox.classList.contains('active')) return;
       if (e.key === 'Escape') closeLightbox();
       else if (e.key === 'ArrowLeft') prevPhoto();
       else if (e.key === 'ArrowRight') nextPhoto();
+      else if (e.key === '+' || e.key === '=') setZoom(zoomState.scale * 1.2);
+      else if (e.key === '-' || e.key === '_') setZoom(zoomState.scale / 1.2);
+      else if (e.key === '0') resetZoom();
+    });
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', prevPhoto);
+    lightboxNext.addEventListener('click', nextPhoto);
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox) closeLightbox();
     });
 
     /* ==================== 弹窗事件委托：绑定照片画廊点击 ==================== */
@@ -1940,7 +2190,7 @@
       }
     });
 
-    /* ==================== 移动端面板折叠 ==================== */
+    /* ==================== 面板折叠（桌面+移动） ==================== */
     const topControls = document.getElementById('topControls');
     const togglePanelBtn = document.getElementById('togglePanelBtn');
     let userCollapsed = false;
@@ -1956,7 +2206,6 @@
     }
 
     togglePanelBtn.addEventListener('click', function () {
-      if (!isMobile()) return;
       topControls.classList.toggle('collapsed');
       userCollapsed = topControls.classList.contains('collapsed');
     });
@@ -1966,10 +2215,6 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         applyMobileState();
-        if (!isMobile()) {
-          topControls.classList.remove('collapsed');
-          userCollapsed = false;
-        }
         var dims = getPopupMaxWidth();
         var popupEl = document.querySelector('.leaflet-popup');
         if (popupEl) {
