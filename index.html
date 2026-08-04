@@ -294,6 +294,40 @@
     }
 
 
+    .lang-switch-btn {
+      margin-top: clamp(6px, 0.7vw, 10px);
+      padding: clamp(4px, 0.5vw, 6px) clamp(8px, 1vw, 12px);
+      background: rgba(36, 41, 47, 0.08);
+      border-radius: clamp(6px, 0.7vw, 8px);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #2c3e50;
+      font-size: clamp(10px, 1vw, 12px);
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      user-select: none;
+      width: 100%;
+    }
+
+    .lang-switch-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(36, 41, 47, 0.12);
+    }
+
+    .lang-switch-btn:active {
+      transform: scale(0.96);
+    }
+
+    .lang-switch-btn .lang-icon {
+      font-size: clamp(11px, 1.2vw, 14px);
+    }
+
+
     .legend-panel {
       position: absolute;
       z-index: 1000;
@@ -317,9 +351,16 @@
       font-size: clamp(10px, 1.1vw, 12px);
       color: #5a6c7d;
       line-height: 1.4;
+      flex-wrap: wrap;
     }
 
-    .legend-item span:last-child {
+    .legend-item .legend-name {
+      font-weight: 600;
+      color: #2c3e50;
+      flex-shrink: 0;
+    }
+
+    .legend-item .legend-desc {
       flex: 1;
       min-width: 0;
     }
@@ -973,7 +1014,7 @@
   <div id="map"></div>
 
   <!-- ========== 加载提示 ========== -->
-  <div class="glass-panel loading-tip" id="loadingTip">正在加载门店数据...</div>
+  <div class="glass-panel loading-tip" id="loadingTip" data-default-text="正在加载门店数据...">正在加载门店数据...</div>
 
   <!-- 顶栏控件容器 -->
   <div id="topControls">
@@ -1051,20 +1092,25 @@
     <h3>图例说明</h3>
     <div class="legend-item">
       <span class="legend-dot" style="background:#2ecc71;"></span>
-      <span>原址营业</span><span>（仍在原地址）</span>
+      <span class="legend-name">原址营业</span><span class="legend-desc">（仍在原地址）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#f1c40f;"></span>
-      <span>同楼搬迁</span><span>（同大楼内移位）</span>
+      <span class="legend-name">同楼搬迁</span><span class="legend-desc">（同大楼内移位）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#e67e22;"></span>
-      <span>商号远迁</span><span>（迁至附近街区）</span>
+      <span class="legend-name">商号远迁</span><span class="legend-desc">（迁至附近街区）</span>
     </div>
     <div class="legend-item">
       <span class="legend-dot" style="background:#e74c3c;"></span>
-      <span>建筑拆除</span><span>（原址已不存在）</span>
+      <span class="legend-name">建筑拆除</span><span class="legend-desc">（原址已不存在）</span>
     </div>
+    <!-- 繁简切换按钮 -->
+    <button class="lang-switch-btn" id="langSwitchBtn" title="繁體/簡體切換">
+      <span class="lang-icon">🌐</span>
+      <span class="lang-label" data-lang-label="zh">繁體</span>
+    </button>
   </div>
 
   <!-- ========== 灯箱（全屏查看照片） ========== -->
@@ -1415,7 +1461,7 @@
       var p = feature.properties || {};
       var statusKey = p.status_key || p.status || '';
       var statusColor = STATUS_COLORS[statusKey] || '#95a5a6';
-      var statusLabel = STATUS_LABELS[statusKey] || '未知';
+      var statusLabel = STATUS_LABELS[statusKey] || t('popup_unknown');
       var statusText = p.status || '';
       var storeAddress = p.address || '';
 
@@ -1430,7 +1476,7 @@
       var timelineHtml = '';
 
       if (locations.length > 0) {
-        timelineHtml = '<div class="popup-section-title">📍 历史变迁</div><div class="history-timeline">';
+        timelineHtml = '<div class="popup-section-title">' + t('popup_history') + '</div><div class="history-timeline">';
 
         locations.forEach(function (loc, idx) {
           var isCurrent = idx === locations.length - 1;
@@ -1469,19 +1515,19 @@
 
       var storePhotoHtml = '';
       if (storePhotos.length > 0) {
-        storePhotoHtml = '<div class="popup-section-title">📷 门店照片</div>' + buildPhotoGallery(storePhotos, 'store');
+        storePhotoHtml = '<div class="popup-section-title">' + t('popup_photos') + '</div>' + buildPhotoGallery(storePhotos, 'store');
       }
 
-      return '<div class="popup-title">' + (p.name || '未知门店') + '</div>' +
+      return '<div class="popup-title">' + (p.name || t('popup_unknown')) + '</div>' +
         '<div class="popup-row">' +
-          '<span class="popup-label">地区：</span>' +
+          '<span class="popup-label">' + t('popup_region') + '</span>' +
           '<span class="popup-value">' + (p.region || '-') + '</span>' +
         '</div>' +
         '<div class="popup-row">' +
-          '<span class="popup-label">城市：</span>' +
+          '<span class="popup-label">' + t('popup_city') + '</span>' +
           '<span class="popup-value">' + (p.city || '-') + '</span>' +
         '</div>' +
-        (storeAddress ? '<div class="popup-row"><span class="popup-label">地址：</span><span class="popup-value">' + storeAddress + '</span></div>' : '') +
+        (storeAddress ? '<div class="popup-row"><span class="popup-label">' + t('popup_address') + '</span><span class="popup-value">' + storeAddress + '</span></div>' : '') +
         '<div style="margin-top:8px;">' +
           '<span class="status-tag" style="background:' + statusColor + ';">' + statusLabel + '</span>' +
         '</div>' +
@@ -1866,7 +1912,7 @@
       })
       .then(function (data) {
         if (!data.features || data.features.length === 0) {
-          loadingTip.textContent = '⚠️ 数据为空';
+          loadingTip.textContent = t('load_empty');
           return;
         }
 
@@ -1896,7 +1942,7 @@
 
         function updateLoadingProgress() {
           if (processedCount < totalToProcess) {
-            loadingTip.textContent = '正在加载门店数据... (' + processedCount + '/' + totalToProcess + ')';
+            loadingTip.textContent = t('loading') + ' (' + processedCount + '/' + totalToProcess + ')';
             loadingTip.style.display = 'block';
           } else {
             loadingTip.style.display = 'none';
@@ -2017,7 +2063,7 @@
       .catch(function (err) {
         loadingTip.style.display = 'none';
         console.error('❌ 加载 GeoJSON 失败：', err);
-        loadingTip.textContent = '⚠️ 数据加载失败，请检查 data/sample.geojson 文件';
+        loadingTip.textContent = t('load_fail');
         loadingTip.style.display = 'block';
       });
 
@@ -2102,7 +2148,7 @@
       });
 
       if (matches.length === 0) {
-        searchResults.innerHTML = '<div class="search-no-result">没有找到该门店</div>';
+        searchResults.innerHTML = '<div class="search-no-result">' + t('no_result') + '</div>';
       } else {
         const maxDisplay = 20;
         let html = '';
@@ -2245,6 +2291,209 @@
     });
 
     applyMobileState();
+
+    /* ==================== 繁简切换 ==================== */
+    const I18N_KEY = 'mcd_lang_v1';
+    let currentLang = 'zh';
+    try {
+      var savedLang = localStorage.getItem(I18N_KEY);
+      if (savedLang === 'zh' || savedLang === 'tw') currentLang = savedLang;
+    } catch (e) {}
+
+    var TRANSLATIONS = {
+      'zh': {
+        'lang_label': '繁體',
+        'title': '大中华麦当劳旧址档案',
+        'subtitle': '记录麦当劳在大中华区的历史门店变迁。标记原址营业、搬迁、拆除等状态，保留城市商业记忆。',
+        'submit': '✏️ 投稿新门店',
+        'repo': '项目仓库',
+        'search_placeholder': '搜索门店名称 / 城市...',
+        'filter_all': '全部状态',
+        'filter_original': '🟢 原址营业',
+        'filter_same': '🟡 同楼搬迁',
+        'filter_far': '🟠 商号远迁',
+        'filter_gone': '🔴 建筑拆除',
+        'legend_title': '图例说明',
+        'legend_original': '原址营业',
+        'legend_original_sub': '（仍在原地址）',
+        'legend_same': '同楼搬迁',
+        'legend_same_sub': '（同大楼内移位）',
+        'legend_far': '商号远迁',
+        'legend_far_sub': '（迁至附近街区）',
+        'legend_gone': '建筑拆除',
+        'legend_gone_sub': '（原址已不存在）',
+        'loading': '正在加载门店数据...',
+        'load_empty': '⚠️ 数据为空',
+        'load_fail': '⚠️ 数据加载失败，请检查 data/sample.geojson 文件',
+        'no_result': '没有找到该门店',
+        'more_results': '还有 {n} 条结果...',
+        'popup_unknown': '未知门店',
+        'popup_region': '地区：',
+        'popup_city': '城市：',
+        'popup_address': '地址：',
+        'popup_history': '📍 历史变迁',
+        'popup_photos': '📷 门店照片',
+        'status_original': '原址营业',
+        'status_same': '同楼搬迁',
+        'status_far': '商号远迁',
+        'status_gone': '建筑拆除',
+        'close': '关闭',
+        'prev': '上一张',
+        'next': '下一张',
+        'zoom_out': '缩小',
+        'zoom_in': '放大',
+        'zoom_reset': '重置'
+      },
+      'tw': {
+        'lang_label': '簡體',
+        'title': '大中華麥當勞舊址檔案',
+        'subtitle': '記錄麥當勞在大中華區的歷史門店變遷。標記原址營業、搬遷、拆除等狀態，保留城市商業記憶。',
+        'submit': '✏️ 投稿新門店',
+        'repo': '項目倉庫',
+        'search_placeholder': '搜索門店名稱 / 城市...',
+        'filter_all': '全部狀態',
+        'filter_original': '🟢 原址營業',
+        'filter_same': '🟡 同樓搬遷',
+        'filter_far': '🟠 商號遠遷',
+        'filter_gone': '🔴 建築拆除',
+        'legend_title': '圖例說明',
+        'legend_original': '原址營業',
+        'legend_original_sub': '（仍在原地址）',
+        'legend_same': '同樓搬遷',
+        'legend_same_sub': '（同大樓內移位）',
+        'legend_far': '商號遠遷',
+        'legend_far_sub': '（遷至附近街區）',
+        'legend_gone': '建築拆除',
+        'legend_gone_sub': '（原址已不存在）',
+        'loading': '正在加載門店數據...',
+        'load_empty': '⚠️ 數據為空',
+        'load_fail': '⚠️ 數據加載失敗，請檢查 data/sample.geojson 文件',
+        'no_result': '沒有找到該門店',
+        'more_results': '還有 {n} 條結果...',
+        'popup_unknown': '未知門店',
+        'popup_region': '地區：',
+        'popup_city': '城市：',
+        'popup_address': '地址：',
+        'popup_history': '📍 歷史變遷',
+        'popup_photos': '📷 門店照片',
+        'status_original': '原址營業',
+        'status_same': '同樓搬遷',
+        'status_far': '商號遠遷',
+        'status_gone': '建築拆除',
+        'close': '關閉',
+        'prev': '上一張',
+        'next': '下一張',
+        'zoom_out': '縮小',
+        'zoom_in': '放大',
+        'zoom_reset': '重置'
+      }
+    };
+
+    function t(key) {
+      var dict = TRANSLATIONS[currentLang] || TRANSLATIONS['zh'];
+      return dict[key] || TRANSLATIONS['zh'][key] || key;
+    }
+
+    function applyTranslations() {
+      var langBtn = document.getElementById('langSwitchBtn');
+      var langLabel = langBtn ? langBtn.querySelector('.lang-label') : null;
+      if (langLabel) langLabel.textContent = t('lang_label');
+
+      document.title = t('title');
+
+      var h1 = document.querySelector('#infoPanelWrap .info-panel h1');
+      if (h1) h1.textContent = '🍔 ' + t('title');
+
+      var p = document.querySelector('#infoPanelWrap .info-panel p');
+      if (p) p.textContent = t('subtitle');
+
+      var submitBtn = document.querySelector('.submit-btn');
+      if (submitBtn) submitBtn.innerHTML = t('submit');
+
+      var repoBtn = document.querySelector('.repo-btn');
+      if (repoBtn) {
+        var repoSvg = repoBtn.querySelector('svg');
+        repoBtn.innerHTML = '';
+        if (repoSvg) repoBtn.appendChild(repoSvg);
+        repoBtn.appendChild(document.createTextNode(t('repo')));
+      }
+
+      var searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.placeholder = t('search_placeholder');
+
+      var filter = document.getElementById('statusFilter');
+      if (filter) {
+        filter.options[0].textContent = t('filter_all');
+        filter.options[1].textContent = t('filter_original');
+        filter.options[2].textContent = t('filter_same');
+        filter.options[3].textContent = t('filter_far');
+        filter.options[4].textContent = t('filter_gone');
+      }
+
+      var legendH3 = document.querySelector('.legend-panel h3');
+      if (legendH3) legendH3.textContent = t('legend_title');
+
+      var legendItems = document.querySelectorAll('.legend-item');
+      if (legendItems.length >= 4) {
+        var sets = [
+          ['legend_original', 'legend_original_sub'],
+          ['legend_same', 'legend_same_sub'],
+          ['legend_far', 'legend_far_sub'],
+          ['legend_gone', 'legend_gone_sub']
+        ];
+        sets.forEach(function(s, i) {
+          var nameEl = legendItems[i].querySelector('.legend-name');
+          var descEl = legendItems[i].querySelector('.legend-desc');
+          if (nameEl) nameEl.textContent = t(s[0]);
+          if (descEl) descEl.textContent = t(s[1]);
+        });
+      }
+
+      var loadingTip = document.getElementById('loadingTip');
+      if (loadingTip && loadingTip.dataset.defaultText) {
+        loadingTip.textContent = loadingTip.dataset.defaultText.replace(/简体|繁體|簡體/g, function(m) {
+          return currentLang === 'tw' ? (m === '简体' ? '簡體' : m) : (m === '簡體' ? '简体' : m);
+        });
+      }
+
+      var closeBtn = document.getElementById('lightboxClose');
+      if (closeBtn) closeBtn.setAttribute('aria-label', t('close'));
+      var prevBtn = document.getElementById('lightboxPrev');
+      if (prevBtn) prevBtn.setAttribute('aria-label', t('prev'));
+      var nextBtn = document.getElementById('lightboxNext');
+      if (nextBtn) nextBtn.setAttribute('aria-label', t('next'));
+      var zoomOutBtn = document.getElementById('zoomOutBtn');
+      if (zoomOutBtn) zoomOutBtn.setAttribute('aria-label', t('zoom_out'));
+      var zoomInBtn = document.getElementById('zoomInBtn');
+      if (zoomInBtn) zoomInBtn.setAttribute('aria-label', t('zoom_in'));
+      var zoomResetBtn = document.getElementById('zoomResetBtn');
+      if (zoomResetBtn) zoomResetBtn.setAttribute('aria-label', t('zoom_reset'));
+
+      var statusLabels = {
+        still_open_original: 'status_original',
+        moved_same_building: 'status_same',
+        moved_far_away: 'status_far',
+        building_gone: 'status_gone'
+      };
+      for (var k in statusLabels) {
+        STATUS_LABELS[k] = t(statusLabels[k]);
+      }
+
+      if (typeof renderSearchResults === 'function') {
+        renderSearchResults(currentSearch);
+      }
+    }
+
+    var langSwitchBtn = document.getElementById('langSwitchBtn');
+    if (langSwitchBtn) {
+      langSwitchBtn.addEventListener('click', function () {
+        currentLang = currentLang === 'zh' ? 'tw' : 'zh';
+        try { localStorage.setItem(I18N_KEY, currentLang); } catch (e) {}
+        applyTranslations();
+      });
+    }
+
+    applyTranslations();
   </script>
 </body>
 </html>
